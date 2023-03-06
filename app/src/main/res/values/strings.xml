@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">WSPersonalShopper</string>
+    <string name="admin_description">admin_description</string>
+
+    <string name="activity_intent_filter_action">com.winshopzebra.ACTION</string>
+    <string name="activity_intent_filter_action_alternative" translatable="false">device.scanner.EVENT</string>
+    <string name="datawedge_intent_key_data">com.symbol.datawedge.data_string</string>
+
+    <!--Kiosk Mode-->
+    <string name="device_admin_enabled">Device Admin enabled</string>
+    <string name="device_admin_warning">Warning: Device Admin is going to be disabled.</string>
+    <string name="device_admin_disabled">Device Admin disabled</string>
+    <string name="kiosk_mode_enabled">Kiosk Mode enabled</string>
+    <string name="kiosk_mode_disabled">Kiosk Mode disabled</string>
+    <string name="kiosk_not_permitted">Kiosk Mode not permitted</string>
+    <string name="not_device_admin">This app is not a device admin!</string>
+    <string name="not_device_owner">This app is not the device owner!</string>
+    <string name="title_activity_basket">BasketActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+</resources>
