@@ -32,18 +32,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="8dp"
-        android:background="@android:color/transparent"
-        android:text="X"
-        android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/tvItemMnoz"
         android:layout_width="40dp"
@@ -54,16 +42,16 @@
         android:text="2"
         android:textColor="@color/black"
         android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/btnPlus"
-        app:layout_constraintStart_toEndOf="@+id/btnMinus"
+        app:layout_constraintEnd_toStartOf="@+id/btnItemPlus"
+        app:layout_constraintStart_toEndOf="@+id/btnItemMinus"
         app:layout_constraintTop_toBottomOf="@+id/tvItemCena" />
 
     <Button
-        android:id="@+id/btnMinus"
+        android:id="@+id/btnItemMinus"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginStart="50dp"
-        android:background="@color/lightGrayBtn"
+        android:layout_marginStart="90dp"
+        android:background="@color/winshop_light_blue"
         android:text="-"
         android:textColor="@color/black"
         android:textSize="20sp"
@@ -72,11 +60,11 @@
         app:layout_constraintTop_toBottomOf="@+id/tvItemCena" />
 
     <Button
-        android:id="@+id/btnPlus"
+        android:id="@+id/btnItemPlus"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginEnd="50dp"
-        android:background="@color/lightGrayBtn"
+        android:layout_marginEnd="40dp"
+        android:background="@color/winshop_light_blue"
         android:text="+"
         android:textColor="@color/black"
         android:textSize="20sp"
@@ -85,6 +73,7 @@
         app:layout_constraintTop_toBottomOf="@+id/tvItemCena" />
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_marginTop="4dp"
@@ -94,4 +83,23 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"></LinearLayout>
+
+    <ImageButton
+        android:id="@+id/btnItemDel"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:background="@color/winshop_light_blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvItemCena"
+        app:srcCompat="@drawable/btn_del" />
+
+    <ImageButton
+        android:id="@+id/btnItemShow"
+        android:layout_width="30dp"
+        android:layout_height="50dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:srcCompat="@drawable/up_down" />
 </android.support.constraint.ConstraintLayout>

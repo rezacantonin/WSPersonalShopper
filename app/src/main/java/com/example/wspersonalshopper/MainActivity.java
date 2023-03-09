@@ -7,8 +7,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -33,10 +37,9 @@ public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Button btnKiosk, btnBasket, btnCfg;
-    private TextView tvStatus;
-    private ImageView imgWS;
-    private Spinner dropdown;
+    private Button btnPrihlas, btnBasket, btnCfg;
+    private TextView tvStatus, tvTerminal, tvSklad, tvVerze;
+    private ImageView imgWS, imgLogo;
 
     public static Context appContext;
     Object[][] resultSet;
@@ -44,10 +47,11 @@ public class MainActivity extends BaseActivity {
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
 
-    private String server, database, guid, terminal_nazev, logoString, androidID, skladNazev, error_code;
+    private String server, database, guid, terminal_nazev, androidID, sklad_nazev, error_code;
+    private int sklad_id, terminal_id;
     private boolean presApi;
-    private int sklad, terminal_id;
     private DataBridge db;
+
     private boolean connectionOK;
     private String[] sklady;
     private Integer[] skladyID;
@@ -58,24 +62,28 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         appContext = getApplicationContext();
-        dropdown = new Spinner(MainActivity.this);
 
-        btnKiosk = findViewById(R.id.btnKiosk);
+        btnPrihlas = findViewById(R.id.btnPrihlas);
         btnBasket = findViewById(R.id.btnBasket);
         btnCfg = findViewById(R.id.btnCfg);
         tvStatus = findViewById(R.id.tvStatus);
         imgWS=findViewById(R.id.imgWinShop);
+        imgLogo=findViewById(R.id.imgLogo);
+        tvTerminal=findViewById(R.id.tVTerminal);
+        tvSklad=findViewById(R.id.tvSklad);
+        tvVerze=findViewById(R.id.tvVerze);
 
         setUpAdmin();
         updateButtonState();
 
         preferences = getApplicationContext().getSharedPreferences(PreferConst.SHARED_PREFS, MODE_PRIVATE);
         editor = preferences.edit();
-/*
+        /*
         editor.clear();
         editor.commit();
         exit(0);
-*/
+         */
+
         androidID = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         guid = "";
         if (!preferences.contains(PreferConst.ANDROID_ID)) {
@@ -86,7 +94,7 @@ public class MainActivity extends BaseActivity {
         btnCfg.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                NastavPripojeni();
+                Heslo("Nastaveni připojeni", "P");
                 return false;
             }
         });
@@ -104,7 +112,15 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        btnKiosk.setOnLongClickListener(new View.OnLongClickListener() {
+        btnPrihlas.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Heslo("Nastaveni skladu", "S" );
+                return false;
+            }
+        });
+
+        imgWS.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 enableKioskMode(!WSPersonalShopperApp.isInLockMode());
@@ -113,13 +129,10 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        imgWS.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-
-                return false;
-            }
-        });
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
 
         ProcesInicializace();
     }
@@ -127,6 +140,8 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        mDecorView = getWindow().getDecorView();
+        hideSystemUI();
     }
 
     @Override
@@ -141,9 +156,9 @@ public class MainActivity extends BaseActivity {
 
     private void updateButtonState() {
         if (WSPersonalShopperApp.isInLockMode()) {
-            btnKiosk.setText("D");
+            btnPrihlas.setText("D");
         } else {
-            btnKiosk.setText("E");
+            btnPrihlas.setText("E");
         }
     }
 
@@ -153,6 +168,19 @@ public class MainActivity extends BaseActivity {
         database = preferences.getString(PreferConst.DATABASE, "");
         terminal_id = preferences.getInt(PreferConst.TERMINAL_ID, 0);
         terminal_nazev = preferences.getString(PreferConst.TERMINAL_NAZEV, "");
+        sklad_id = preferences.getInt(PreferConst.SKLAD, 0);
+        sklad_nazev = preferences.getString(PreferConst.SKLAD_NAZEV, "");
+
+        tvTerminal.setText(terminal_nazev);
+        tvSklad.setText(sklad_nazev);
+        String version = "";
+        try {
+            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        tvVerze.setText(version);
+
         if (server.equals("")) NastavPripojeni();
         else Pripojeni();
     }
@@ -235,18 +263,21 @@ public class MainActivity extends BaseActivity {
                 connectionOK = false;
             }
             if (connectionOK) {
-                String logoStringShort;
                 try {
                     db.SetQuery_MOBILNI_LOGIN(1, 2, androidID, "", "", "", "", 0, "");
                     if (db.ExecQuery()) {
                         status = db.getInt("VSTUP");
-
                         byte[] encodedBytes = new byte[0];
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                             encodedBytes = Base64.getDecoder().decode(db.getString("LOGO"));
+                            Bitmap logo = BitmapFactory.decodeByteArray(encodedBytes, 0, encodedBytes.length);
+                            if (logo == null) {
+                                imgLogo.setVisibility(View.INVISIBLE);
+                            } else {
+                                imgLogo.setVisibility(View.VISIBLE);
+                                imgLogo.setImageBitmap(logo);
+                            }
                         }
-                        logoString=new String(encodedBytes);
-                        logoString = "";
                     } else {
                         errMsg = db.ErrorMsg;
                     }
@@ -276,35 +307,13 @@ public class MainActivity extends BaseActivity {
             case 1:
                 // povoleni prihlaseni
                 tvStatus.setText("");
-                Prihlaseni();
+                Prihlaseni(false);
                 btnBasket.setEnabled(true);
                 break;
             case 2: // cekani na dokonceni registrace
                 tvStatus.setText("Toto zařízení nemá povolený přístup");
                 break;
         }
-
-        // logo
-                /*
-                if (logoString == null || logoString.equals("")) {
-                    logoImg.setVisibility(View.INVISIBLE);
-                } else {
-                    if (logoString.substring(0, 2).toLowerCase() == "0x") {
-                        logoStringShort = logoString.substring(2);
-                    } else {
-                        logoStringShort = logoString;
-                    }
-                    byte[] logoData = hexStringToByteArray(logoString);
-                    Bitmap logo = BitmapFactory.decodeByteArray(logoData, 0, logoData.length);
-                    if (logo == null) {
-                        logoImg.setVisibility(View.INVISIBLE);
-                    } else {
-                        logoImg.setVisibility(View.VISIBLE);
-                        logoImg.setImageBitmap(logo);
-                    }
-                }
-                */
-        //
     }
 
     private void Registrace() {
@@ -334,14 +343,14 @@ public class MainActivity extends BaseActivity {
                 {
                     try {
                         int status = 0;
-                        db.SetQuery_MOBILNI_LOGIN(1, 3, "1234", terminal_nazev, "", "", "", 0, "CS");
+                        db.SetQuery_MOBILNI_LOGIN(1, 3, "1234", terminal_nazev, "", "", "rezac@winshop.cz", 0, "CS");
                         if (db.ExecQuery()) {
                             status = db.getInt("REGISTRACE");
                         }
                         switch (status) {
                             case 0:
                                 Toast.makeText(MainActivity.this, "Zařízení již bylo zaregistrováno", Toast.LENGTH_SHORT);
-                                Prihlaseni();
+                                Prihlaseni(false);
                             case 1:
                                 Messages.ShowInfo(MainActivity.this, "Registrace", "Registrace byla dokončena.\nVyčkejte na potvrzení", null);
                         }
@@ -361,20 +370,20 @@ public class MainActivity extends BaseActivity {
         alert.show();
     }
 
-    private void Prihlaseni() {
+    private void Prihlaseni(boolean zobrSklad) {
         if (connectionOK) {
             int pass = 0;
-            int terminal_id = 0;
-            String terminal_nazev = "";
-            int skladId = 0;
+            int pom_terminal_id = 0;
+            String pom_terminal_nazev = "";
+            int pom_sklad_id = 0;
             try {
                 db.SetQuery_MOBILNI_LOGIN(1, 1, "1234", "", "", "", "", 0, "");
                 if (db.ExecQuery()) {
                     pass = db.getInt("PASS");
                     guid = db.getString("guid");
-                    skladId = db.getInt("SKLAD_ID");
-                    terminal_id = db.getInt("id");
-                    terminal_nazev = db.getString("NAZEV");
+                    pom_sklad_id = db.getInt("SKLAD_ID");
+                    pom_terminal_id = db.getInt("id");
+                    pom_terminal_nazev = db.getString("NAZEV");
                 } else Messages.ShowError(MainActivity.this, "Přihlášení", db.ErrorMsg, null);
                 db.CloseQuery();
             } catch (Exception ex) {
@@ -387,15 +396,25 @@ public class MainActivity extends BaseActivity {
                 case 1:
                     //zarizeni nalezeno. povoleno prihlaseni
                     tvStatus.setText("");
-
                     editor.putString(PreferConst.GUID, guid);
-                    editor.putInt(PreferConst.TERMINAL_ID, terminal_id);
-                    editor.putString(PreferConst.TERMINAL_NAZEV, terminal_nazev);
+                    if (terminal_id!=pom_terminal_id) {
+                        terminal_id=pom_terminal_id;
+                        editor.putInt(PreferConst.TERMINAL_ID, terminal_id);
+                    }
+                    if (!terminal_nazev.equals(pom_terminal_nazev)) {
+                        terminal_nazev = pom_terminal_nazev;
+                        editor.putString(PreferConst.TERMINAL_NAZEV, terminal_nazev);
+                        tvTerminal.setText(terminal_nazev);
+                    }
+                    if (sklad_id!=pom_sklad_id) {
+                        sklad_id = pom_sklad_id;
+                        editor.putInt(PreferConst.SKLAD, sklad_id);
+                    }
                     editor.apply();
 
                     db.ReInit(androidID, guid, server, presApi, this);
 
-                    if (skladId == 0) NastaveniSkladu();
+                    if (sklad_id == 0 || zobrSklad) NastaveniSkladu();
 
                     break;
                 default:
@@ -443,6 +462,7 @@ public class MainActivity extends BaseActivity {
                 Messages.ShowError(MainActivity.this, "Výběr skladu", ex.getMessage(), null);
             }
             if (sklady.length > 0) {
+                Spinner dropdown = new Spinner(MainActivity.this);
                 ArrayAdapter<String> adapter_b = new ArrayAdapter<String>(MainActivity.this,
                         android.R.layout.simple_dropdown_item_1line, sklady);
 
@@ -452,13 +472,13 @@ public class MainActivity extends BaseActivity {
 
                     public void onItemSelected(AdapterView<?> parentView,
                                                View selectedItemView, int position, long id) {
-                        sklad = skladyID[dropdown.getSelectedItemPosition()];
-                        skladNazev = sklady[dropdown.getSelectedItemPosition()];
+                        sklad_id = skladyID[dropdown.getSelectedItemPosition()];
+                        sklad_nazev = sklady[dropdown.getSelectedItemPosition()];
                     }
 
                     public void onNothingSelected(AdapterView<?> arg0) {// do nothing
-                        sklad = skladyID[dropdown.getSelectedItemPosition()];
-                        skladNazev = sklady[dropdown.getSelectedItemPosition()];
+                        sklad_id = skladyID[dropdown.getSelectedItemPosition()];
+                        sklad_nazev = sklady[dropdown.getSelectedItemPosition()];
                     }
 
                 });
@@ -474,12 +494,12 @@ public class MainActivity extends BaseActivity {
 
                 alert_sklad.setPositiveButton("Nastavit", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        editor.putInt(PreferConst.SKLAD, sklad);
-                        editor.putString(PreferConst.SKLAD_NAZEV, skladNazev);
+                        editor.putInt(PreferConst.SKLAD, sklad_id);
+                        editor.putString(PreferConst.SKLAD_NAZEV, sklad_nazev);
                         editor.apply();
                         try {
                             int status = 0;
-                            db.SetQuery_MOBILNI_LOGIN(0, 5, "", "", "", "", "", sklad, "");
+                            db.SetQuery_MOBILNI_LOGIN(0, 5, "", "", "", "", "", sklad_id, "");
                             if (db.ExecQuery()) {
                                 if (db.hasRow) {
                                     status = db.getInt("VLOZENO");
@@ -488,7 +508,7 @@ public class MainActivity extends BaseActivity {
                                 Messages.ShowError(MainActivity.this, "Přihlášení", db.ErrorMsg, null);
                             db.CloseQuery();
                             if (status == 1) {
-
+                                tvSklad.setText(sklad_nazev);
                             }
                         } catch (Exception ex) {
                             String msg = ex.getMessage();
@@ -505,6 +525,42 @@ public class MainActivity extends BaseActivity {
                 alert_sklad.show();
             }
         }
+    }
+
+    private void Heslo(String title, String param)
+    {
+        final AlertDialog.Builder alertPw = new AlertDialog.Builder(MainActivity.this);
+
+        alertPw.setTitle(title);
+        alertPw.setMessage("Zadejte heslo");
+
+        final EditText adminPasswordEdittext = new EditText(MainActivity.this);
+        final TextView adminPwTextView = new TextView(MainActivity.this);
+
+        adminPwTextView.setText("");
+        adminPasswordEdittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        LinearLayout ll = new LinearLayout(MainActivity.this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        ll.addView(adminPwTextView);
+        ll.addView(adminPasswordEdittext);
+        alertPw.setView(ll);
+        alertPw.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String heslo = adminPasswordEdittext.getText().toString();
+                if (heslo.matches("1596") || heslo.matches("defAdmPw")) {
+                    if (param=="P") NastavPripojeni();
+                    else Prihlaseni(true);
+                }
+            }
+        });
+
+        alertPw.setNegativeButton("Zpět", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+            }
+        });
+
+        alertPw.show();
     }
 
     public static Context getContextOfApplication() {

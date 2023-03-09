@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
+import android.view.View;
+import android.view.WindowManager;
 
 public class Messages {
 
@@ -62,6 +64,20 @@ public class Messages {
             dialog.setPositiveButton("Ok",onClickListener);
         dialog.setCancelable(false);
         dialog.show();
+        /*
+        AlertDialog dlg=dialog.show();
+        dlg.getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        dlg.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        dlg.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+        */
+
+
+
     }
 
     public static void ShowRedAlert(Context context, String title, String message, DialogInterface.OnClickListener onClickListener) {
