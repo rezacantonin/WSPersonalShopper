@@ -20,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -37,7 +38,8 @@ public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Button btnPrihlas, btnBasket, btnCfg;
+    private Button btnPrihlas, btnCfg;
+    private ImageButton btnBasket;
     private TextView tvStatus, tvTerminal, tvSklad, tvVerze;
     private ImageView imgWS, imgLogo;
 

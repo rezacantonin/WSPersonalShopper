@@ -2,6 +2,7 @@ package com.example.wspersonalshopper;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,19 +28,16 @@ import java.util.ArrayList;
 
 public class BasketActivity extends BaseActivity  {
 
-    private TextView tvText;
+    private TextView tvNazev;
     private  TextView tvCelkem;
 
     private ArrayList<C_Item> basketItems;
+    private C_Item aktItem;
     private ListView lvItems;
     private ItemsAdapter adapter;
 
     private boolean queryInProgress;
     private DataBridge db;
-    private String guid, androidID, server;
-    private int terminalId;
-    private boolean presApi;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +45,11 @@ public class BasketActivity extends BaseActivity  {
         setContentView(R.layout.activity_basket);
         //
         SharedPreferences preferencesBase = getApplicationContext().getSharedPreferences(PreferConst.SHARED_PREFS, MODE_PRIVATE);
-        guid = preferencesBase.getString(PreferConst.GUID, "");
-        androidID = preferencesBase.getString(PreferConst.ANDROID_ID, "");
-        server = preferencesBase.getString(PreferConst.SERVER, "");
-        terminalId = preferencesBase.getInt(PreferConst.TERMINAL_ID, 0);
-        presApi = preferencesBase.getBoolean(PreferConst.PRES_API, true);
+        String guid = preferencesBase.getString(PreferConst.GUID, "");
+        String androidID = preferencesBase.getString(PreferConst.ANDROID_ID, "");
+        String server = preferencesBase.getString(PreferConst.SERVER, "");
+        int terminalId = preferencesBase.getInt(PreferConst.TERMINAL_ID, 0);
+        boolean presApi = preferencesBase.getBoolean(PreferConst.PRES_API, true);
         //
         db=new DataBridge(androidID,guid,server,presApi, this);
         //
@@ -87,7 +86,7 @@ public class BasketActivity extends BaseActivity  {
             }
         });
 
-        tvText = findViewById(R.id.tvNazev);
+        tvNazev = findViewById(R.id.tvNazev);
         tvCelkem = findViewById(R.id.tvCelkem);
         lvItems = findViewById(R.id.lvItems);
 
@@ -138,6 +137,12 @@ public class BasketActivity extends BaseActivity  {
         tvCelkem.setText(Utils.dfCena.format(soucet));
     }
 
+    public void QuantityFragmentDialog_QuantityOK(Integer quantity) {
+        aktItem.Mnozstvi = quantity;
+        adapter.notifyDataSetChanged();
+        PrepoctiSoucet();
+    }
+
     // ***********************************************************************************
     public class ItemsAdapter extends ArrayAdapter<C_Item> {
 
@@ -159,7 +164,7 @@ public class BasketActivity extends BaseActivity  {
             ImageButton btnItemDel=convertView.findViewById(R.id.btnItemDel);
             TextView tvItemMnoz = convertView.findViewById(R.id.tvItemMnoz);
             //
-            tvName.setText(String.valueOf(item.Mnozstvi)+" "+item.Nazev);
+            tvName.setText(Utils.df.format(item.Mnozstvi)+" "+item.Nazev);
             tvCena.setText(Utils.dfCena.format(item.Cena));
             tvItemMnoz.setText(Utils.df.format(item.Mnozstvi));
             //
@@ -195,6 +200,18 @@ public class BasketActivity extends BaseActivity  {
                 }
             });
 
+            btnItemPlus.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    aktItem=item;
+                    FragmentManager fm = getSupportFragmentManager();
+                    QuantityFragmentDialog  quantityFragmentDialog = QuantityFragmentDialog.newInstance(10);
+                    quantityFragmentDialog.setCancelable(false);
+                    quantityFragmentDialog.show(fm, "QuantityFragmentDialog");
+                    return false;
+                }
+            });
+
             btnItemMinus.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -204,6 +221,18 @@ public class BasketActivity extends BaseActivity  {
                         tvItemMnoz.setText(Utils.df.format(item.Mnozstvi));
                         PrepoctiSoucet();
                     }
+                }
+            });
+
+            btnItemMinus.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    aktItem=item;
+                    FragmentManager fm = getSupportFragmentManager();
+                    QuantityFragmentDialog  quantityFragmentDialog = QuantityFragmentDialog.newInstance(10);
+                    quantityFragmentDialog.setCancelable(false);
+                    quantityFragmentDialog.show(fm, "QuantityFragmentDialog");
+                    return false;
                 }
             });
 
@@ -218,6 +247,12 @@ public class BasketActivity extends BaseActivity  {
 
             return convertView;
         }
+    }
+
+    private void Zapis(C_Item item)
+    {
+
+
     }
 
     // ********************************************************************************************
@@ -326,7 +361,7 @@ public class BasketActivity extends BaseActivity  {
                     db.CloseQuery();
                 }
             } catch (Exception ex) {
-                info.ErrorMsg = ex.getMessage().toString();
+                info.ErrorMsg = ex.getMessage();
             }
             return info;
         }
@@ -345,7 +380,6 @@ public class BasketActivity extends BaseActivity  {
                 if (info.item.MnozVaha > 0) info.item.Mnozstvi = info.item.MnozVaha;
                 else info.item.Mnozstvi = 1;
                 //
-                boolean res = false;
                 boolean nasel = false;
                 for (C_Item i : basketItems) {
                     if (i.Ean.equals(info.item.Ean)) {
@@ -369,9 +403,8 @@ public class BasketActivity extends BaseActivity  {
                 if (info.ConnectErr) {
                     Reconnect();
                 } else {
-                    if (info.ErrorMsg.matches("")) {
-                        if (msg.isEmpty()) msg = "Neznámý čárový kód";
-                    } else msg = "Chyba pří hledání\n" + info.ErrorMsg;
+                    if (info.ErrorMsg.matches("")) msg = "Neznámý čárový kód";
+                    else msg = "Chyba pří hledání\n" + info.ErrorMsg;
                     Messages.ShowRedAlert(BasketActivity.this, "Chyba", msg, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
