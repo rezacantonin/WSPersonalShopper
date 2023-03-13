@@ -21,8 +21,9 @@ public class QuantityFragmentDialog extends DialogFragment {
 
     private static  final  String TAG="QuantityFragmentDialog";
     private static final String ARG_MAXQ = "ARG_MAXQ";
+    private static final String ARG_CURRQ = "ARG_CURRQ";
 
-    private int maxQ;
+    private int maxQ, currQ;
 
     private ArrayList<Integer> data;
     private QuantityAdapter adapter;
@@ -31,10 +32,11 @@ public class QuantityFragmentDialog extends DialogFragment {
         // Required empty public constructor
     }
 
-    public static QuantityFragmentDialog newInstance(Integer _maxQ) {
+    public static QuantityFragmentDialog newInstance(Integer _maxQ, Integer _currQ) {
         QuantityFragmentDialog fragment = new QuantityFragmentDialog();
         Bundle args = new Bundle();
         args.putInt(ARG_MAXQ, _maxQ);
+        args.putInt(ARG_CURRQ, _currQ);
         fragment.setArguments(args);
         return fragment;
     }
@@ -44,8 +46,9 @@ public class QuantityFragmentDialog extends DialogFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             maxQ = getArguments().getInt(ARG_MAXQ);
+            currQ = getArguments().getInt(ARG_CURRQ);
             data = new ArrayList<>();
-            for (int i = 1; i <= 20; i++) data.add(i);
+            for (int i = 1; i <= maxQ; i++) data.add(i);
         }
     }
 
@@ -58,6 +61,7 @@ public class QuantityFragmentDialog extends DialogFragment {
         ListView listView = view.findViewById(R.id.lvQuantityFrag);
         adapter = new QuantityAdapter(getActivity(), data);
         listView.setAdapter(adapter);
+        listView.setSelection(currQ-1);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

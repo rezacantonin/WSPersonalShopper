@@ -12,6 +12,8 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
+import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +21,9 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -60,7 +64,9 @@ public class BasketActivity extends BaseActivity  {
                 if (basketItems.size()>0) {
                     Messages.ShowQuestion(BasketActivity.this, "Upozornění", "Košík není prázdný\nOpravdu ukončit?", new DialogInterface.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which) {
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            VymazVse();
                             finish();
                         }
                     }, null);
@@ -77,11 +83,23 @@ public class BasketActivity extends BaseActivity  {
                     Messages.ShowQuestion(BasketActivity.this, "Upozornění", "Opravdu vyprázdnit košík ?", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            basketItems.clear();
-                            adapter.notifyDataSetChanged();
-                            tvCelkem.setText("0.00");
+                            if (VymazVse()) {
+                                basketItems.clear();
+                                adapter.notifyDataSetChanged();
+                                tvCelkem.setText("0.00");
+                            }
                         }
                     }, null);
+                }
+            }
+        });
+
+        ImageButton btnPayBasket = findViewById(R.id.btnPayBasket);
+        btnPayBasket.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (basketItems.size()>0) {
+                    Heslo();
                 }
             }
         });
@@ -97,7 +115,10 @@ public class BasketActivity extends BaseActivity  {
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        VymazVse();
+
         basketItems = new ArrayList<>();
+        tvNazev.setText("Košík "+terminalId);
 
         adapter = new ItemsAdapter(this, basketItems);
         lvItems.setAdapter(adapter);
@@ -138,9 +159,116 @@ public class BasketActivity extends BaseActivity  {
     }
 
     public void QuantityFragmentDialog_QuantityOK(Integer quantity) {
-        aktItem.Mnozstvi = quantity;
-        adapter.notifyDataSetChanged();
-        PrepoctiSoucet();
+        if (Zapis(aktItem, quantity)) {
+            aktItem.Mnozstvi = quantity;
+            adapter.notifyDataSetChanged();
+            PrepoctiSoucet();
+        }
+    }
+
+    private boolean Zapis(C_Item _item, double _mnozstvi ) {
+        boolean pomRes=false;
+        db.SetQuery_MOBILNI_TERMINAL(1, "PS_VlozRadek", "", _item.ZboziId, _mnozstvi, "", 0, 0, 0);
+        try {
+            if (db.ExecQuery()) {
+                boolean res = db.getInt("VLOZENO") != 0;
+                if (!res)
+                    Messages.ShowError(BasketActivity.this, "Chyba", "Nelze zapsat položku košíku", null);
+                else {
+                    pomRes=true;
+                }
+            } else
+                Messages.ShowError(BasketActivity.this, "Chyba", "Nelze zapsat položku košíku", null);
+            db.CloseQuery();
+        } catch (Exception ex) {
+            Messages.ShowError(BasketActivity.this, "Chyba", "Nelze zapsat položku košíku\n" + ex.getMessage(), null);
+        }
+        return  pomRes;
+    }
+
+    private boolean VymazVse( ) {
+        boolean pomRes=false;
+        db.SetQuery_MOBILNI_TERMINAL(1, "PS_VymazVse", "", 0, 0, "", 0, 0, 0);
+        try {
+            if (db.ExecQuery()) {
+                boolean res = db.getInt("VLOZENO") != 0;
+                if (!res)
+                    Messages.ShowError(BasketActivity.this, "Chyba", "Nelze vymazat položky košíku", null);
+                else {
+                    pomRes=true;
+                }
+            } else
+                Messages.ShowError(BasketActivity.this, "Chyba", "Nelze vymazat položky košíku", null);
+            db.CloseQuery();
+        } catch (Exception ex) {
+            Messages.ShowError(BasketActivity.this, "Chyba", "Nelze zapsat vymazat položky\n" + ex.getMessage(), null);
+        }
+        return  pomRes;
+    }
+
+    private void PlatbaKosiku()
+    {
+        db.SetQuery_MOBILNI_TERMINAL(1, "PS_PlatbaKosiku", "", 0, 0, "", 0, 0, 0);
+        try {
+            if (db.ExecQuery()) {
+                boolean res = db.getInt("VLOZENO") != 0;
+                if (!res)
+                    Messages.ShowError(BasketActivity.this, "Chyba", "Nelze košík načíst do pokladny", null);
+                else {
+                    Messages.ShowQuestion(BasketActivity.this, "Platba", "Vymazat košík ?", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (VymazVse())
+                            {
+                                basketItems.clear();
+                                adapter.notifyDataSetChanged();
+                                tvCelkem.setText("0.00");
+                            }
+                        }
+                    },null);
+                }
+            } else
+                Messages.ShowError(BasketActivity.this, "Chyba", "Nelze košík načíst do pokladny", null);
+            db.CloseQuery();
+        } catch (Exception ex) {
+            Messages.ShowError(BasketActivity.this, "Chyba", "Nelze košík načíst do pokladny\n" + ex.getMessage(), null);
+        }
+
+    }
+
+    private void Heslo()
+    {
+        final AlertDialog.Builder alertPw = new AlertDialog.Builder(BasketActivity.this);
+
+        alertPw.setTitle("Platba košíku");
+        alertPw.setMessage("Zadejte heslo");
+
+        final EditText adminPasswordEdittext = new EditText(BasketActivity.this);
+        final TextView adminPwTextView = new TextView(BasketActivity.this);
+
+        adminPwTextView.setText("");
+        adminPasswordEdittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        LinearLayout ll = new LinearLayout(BasketActivity.this);
+        ll.setOrientation(LinearLayout.VERTICAL);
+        ll.addView(adminPwTextView);
+        ll.addView(adminPasswordEdittext);
+        alertPw.setView(ll);
+        alertPw.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String heslo = adminPasswordEdittext.getText().toString();
+                if (heslo.matches("1596") || heslo.matches("defAdmPw")) {
+                    PlatbaKosiku();
+                }
+            }
+        });
+
+        alertPw.setNegativeButton("Zpět", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+            }
+        });
+
+        alertPw.show();
     }
 
     // ***********************************************************************************
@@ -159,27 +287,20 @@ public class BasketActivity extends BaseActivity  {
             TextView tvName = convertView.findViewById(R.id.tvItemNazev);
             TextView tvCena = convertView.findViewById(R.id.tvItemCena);
             ImageButton btnItemShow=convertView.findViewById(R.id.btnItemShow);
-            Button btnItemPlus=convertView.findViewById(R.id.btnItemPlus);
-            Button btnItemMinus=convertView.findViewById(R.id.btnItemMinus);
+            Button btnItemMnoz=convertView.findViewById(R.id.btnItemMnoz);
             ImageButton btnItemDel=convertView.findViewById(R.id.btnItemDel);
-            TextView tvItemMnoz = convertView.findViewById(R.id.tvItemMnoz);
             //
             tvName.setText(Utils.df.format(item.Mnozstvi)+" "+item.Nazev);
             tvCena.setText(Utils.dfCena.format(item.Cena));
-            tvItemMnoz.setText(Utils.df.format(item.Mnozstvi));
             //
             if (item.ShowEditMnoz)
             {
                 btnItemDel.setVisibility(View.VISIBLE);
-                btnItemPlus.setVisibility(View.VISIBLE);
-                btnItemMinus.setVisibility(View.VISIBLE);
-                tvItemMnoz.setVisibility(View.VISIBLE);
+                btnItemMnoz.setVisibility(View.VISIBLE);
             }
             else {
                 btnItemDel.setVisibility(View.GONE);
-                btnItemPlus.setVisibility(View.GONE);
-                btnItemMinus.setVisibility(View.GONE);
-                tvItemMnoz.setVisibility(View.GONE);
+                btnItemMnoz.setVisibility(View.GONE);
             }
 
             btnItemShow.setOnClickListener(new View.OnClickListener() {
@@ -190,69 +311,30 @@ public class BasketActivity extends BaseActivity  {
                 }
             });
 
-            btnItemPlus.setOnClickListener(new View.OnClickListener() {
+            btnItemMnoz.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    item.Mnozstvi += 1;
-                    tvName.setText(Utils.df.format(item.Mnozstvi) + " " + item.Nazev);
-                    tvItemMnoz.setText(Utils.df.format(item.Mnozstvi));
-                    PrepoctiSoucet();
-                }
-            });
-
-            btnItemPlus.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
                     aktItem=item;
                     FragmentManager fm = getSupportFragmentManager();
-                    QuantityFragmentDialog  quantityFragmentDialog = QuantityFragmentDialog.newInstance(10);
+                    QuantityFragmentDialog  quantityFragmentDialog = QuantityFragmentDialog.newInstance((int)item.Stav, (int)item.Mnozstvi);
                     quantityFragmentDialog.setCancelable(false);
                     quantityFragmentDialog.show(fm, "QuantityFragmentDialog");
-                    return false;
-                }
-            });
-
-            btnItemMinus.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (item.Mnozstvi>0) {
-                        item.Mnozstvi -= 1;
-                        tvName.setText(Utils.df.format(item.Mnozstvi) + " " + item.Nazev);
-                        tvItemMnoz.setText(Utils.df.format(item.Mnozstvi));
-                        PrepoctiSoucet();
-                    }
-                }
-            });
-
-            btnItemMinus.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    aktItem=item;
-                    FragmentManager fm = getSupportFragmentManager();
-                    QuantityFragmentDialog  quantityFragmentDialog = QuantityFragmentDialog.newInstance(10);
-                    quantityFragmentDialog.setCancelable(false);
-                    quantityFragmentDialog.show(fm, "QuantityFragmentDialog");
-                    return false;
                 }
             });
 
             btnItemDel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    basketItems.remove(item);
-                    adapter.notifyDataSetChanged();
-                    PrepoctiSoucet();
+                    if (Zapis(item,0)) {
+                        basketItems.remove(item);
+                        adapter.notifyDataSetChanged();
+                        PrepoctiSoucet();
+                    }
                 }
             });
 
             return convertView;
         }
-    }
-
-    private void Zapis(C_Item item)
-    {
-
-
     }
 
     // ********************************************************************************************
@@ -321,7 +403,7 @@ public class BasketActivity extends BaseActivity  {
                         mnozVaha = Double.parseDouble(ean.substring(6, 12))/1000;
                         ean = ean.substring(0, 6) + "0000000";
                     }
-                    db.SetQuery_MOBILNI_TERMINAL(0, "EAN", ean, 0, 0, "", 0, 0, 0);
+                    db.SetQuery_MOBILNI_TERMINAL(0, "PS_EAN", ean, 0, 0, "", 0, 0, 0);
                     if (db.ExecQuery()) {
                         try {
                             if (db.hasRow) {
@@ -337,18 +419,9 @@ public class BasketActivity extends BaseActivity  {
                                 info.item.RozmerId = db.getInt("ID_ROZMERU");
                                 info.item.RozmerNazev = db.getString("NAZEV_ROZMERU");
                                 //info.item.Cena = rs.getDouble(11);
-                                info.item.StavStr = db.getString("STAV");
-                                info.item.Stav = db.getDouble("STAV_KS");
-                                info.item.LokacePozn = db.getString("POZICE_TEXT");
+                                info.item.Stav = db.getDouble("STAV_KS") - db.getDouble("MNOZ_ZASOBNIK");;
                                 info.item.ZboziId = db.getInt("ZBOZI_ID");
                                 info.item.Cena = db.getDouble("PC");
-                                info.item.Vyprodej = db.getBoolean("VYPRODEJ");
-                                info.item.ZakazObjednani = db.getBoolean("ZAKAZ_OBJEDNAVANI");
-                                info.item.Naktivni = db.getBoolean("NEAKTIVNI_POLOZKA");
-                                info.item.DodavatelId = db.getInt("ID_DODAVATEL");
-                                info.item.NcPosledni = db.getDouble("NC_POSLEDNI");
-                                info.item.TemaId = db.getInt("TEMA_ID");
-                                info.item.SkupinaId = db.getInt("SKUPINA_ID");
                                 info.item.Mnozstvi = 1;
                                 info.item.MnozVaha = mnozVaha;
                                 info.Nasel = true;
@@ -377,26 +450,50 @@ public class BasketActivity extends BaseActivity  {
             String msg = "";
             //
             if (info.Nasel) {
-                if (info.item.MnozVaha > 0) info.item.Mnozstvi = info.item.MnozVaha;
-                else info.item.Mnozstvi = 1;
-                //
-                boolean nasel = false;
-                for (C_Item i : basketItems) {
-                    if (i.Ean.equals(info.item.Ean)) {
-                        nasel = true;
-                        i.Mnozstvi = i.Mnozstvi + info.item.Mnozstvi;
-                        i.ShowEditMnoz = true;
-                        break;
+                if (info.item.Stav>0) {
+                    if (info.item.MnozVaha > 0) info.item.Mnozstvi = info.item.MnozVaha;
+                    else info.item.Mnozstvi = 1;
+                    //
+                    boolean nasel = false;
+                    for (C_Item i : basketItems) {
+                        if (i.Ean.equals(info.item.Ean)) {
+                            nasel = true;
+                            i.ShowEditMnoz = true;
+                            if (info.item.Stav>=i.Mnozstvi + info.item.Mnozstvi) {
+                                if (Zapis(i, i.Mnozstvi + info.item.Mnozstvi)) {
+                                    i.Mnozstvi = i.Mnozstvi + info.item.Mnozstvi;
+                                }
+                            }
+                            else {
+                                Messages.ShowWarning(BasketActivity.this, "Upozornění", "Dosaženo max. množství", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        queryInProgress = false;
+                                    }
+                                });
+                            }
+                            break;
+                        }
                     }
+                    if (!nasel) {
+                        if (Zapis(info.item,info.item.Mnozstvi )) {
+                            C_Item nItem = new C_Item(info.item);
+                            nItem.ShowEditMnoz = true;
+                            basketItems.add(nItem);
+                        }
+                    }
+                    PrepoctiSoucet();
+                    ((BaseAdapter) lvItems.getAdapter()).notifyDataSetChanged();
+                    queryInProgress=false;
                 }
-                if (!nasel) {
-                    C_Item nItem = new C_Item(info.item);
-                    nItem.ShowEditMnoz = true;
-                    basketItems.add(nItem);
+                else {
+                    Messages.ShowWarning(BasketActivity.this, "Upozornění", "Zboží je vyprodáno", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            queryInProgress = false;
+                        }
+                    });
                 }
-                PrepoctiSoucet();
-                ((BaseAdapter) lvItems.getAdapter()).notifyDataSetChanged();
-                queryInProgress=false;
             } else {
                 MediaPlayer mp = MediaPlayer.create(BasketActivity.this, R.raw.beep_01a);
                 mp.start();

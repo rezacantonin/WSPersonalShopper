@@ -31,44 +31,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/tvItemMnoz"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
-        android:gravity="center"
-        android:text="2"
-        android:textColor="@color/black"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/btnItemPlus"
-        app:layout_constraintStart_toEndOf="@+id/btnItemMinus"
-        app:layout_constraintTop_toBottomOf="@+id/tvItemCena" />
-
     <Button
-        android:id="@+id/btnItemMinus"
-        android:layout_width="40dp"
+        android:id="@+id/btnItemMnoz"
+        android:layout_width="80dp"
         android:layout_height="40dp"
-        android:layout_marginStart="90dp"
         android:background="@color/winshop_light_blue"
-        android:text="-"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvItemCena" />
-
-    <Button
-        android:id="@+id/btnItemPlus"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="40dp"
-        android:background="@color/winshop_light_blue"
-        android:text="+"
+        android:text="+ -"
         android:textColor="@color/black"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.7"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvItemCena" />
 
     <LinearLayout
@@ -87,8 +61,9 @@
         android:id="@+id/btnItemDel"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginStart="8dp"
         android:background="@color/winshop_light_blue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.25"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvItemCena"
         app:srcCompat="@drawable/btn_del" />

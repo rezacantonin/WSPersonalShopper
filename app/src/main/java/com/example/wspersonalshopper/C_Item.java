@@ -17,33 +17,8 @@ public class C_Item {
     public String RozmerNazev;
     public double Cena;
     public double Mnozstvi;
-    public String LokacePozn;
-    public int SarzeId;
-    public String Sarze;
     public double Stav;
-    public String StavStr;
     public int ZboziId;
-    // doklady -
-    public double Zvazeno; // u balicku je zde posledni zapsane mnozstvi, nebo nactene mnozstvi pri nacteni
-    public int PolozkaId;
-    public boolean Skryt;
-    public boolean Smaz;
-    //
-    public int LokaceId;
-    public String LokaceKod;
-    //
-    public boolean Vyprodej;
-    public boolean ZakazObjednani;
-    public boolean Naktivni;
-    public int DodavatelId;
-    public double NcPosledni;
-    public int TemaId;
-    public int SkupinaId;
-    //
-    public String HlavniDodavatel;
-    public double PrumProdej;
-    public double MinOdber;
-    //
     public double MnozVaha;
 
     public boolean ShowEditMnoz;
@@ -53,8 +28,8 @@ public class C_Item {
     }
 
     public C_Item(int id, String ean, String kod, String nazev, int velikostId, String velikostNazev, int barvaId, String barvaNazev,
-                  int delkaId, String delkaNazev, int rozmerId, String rozmerNazev, double cena, Double mnozstvi, int lokaceId, String lokaceKod, int zboziId,
-                  double prumProdej, double minOdber) {
+                  int delkaId, String delkaNazev, int rozmerId, String rozmerNazev, double cena, Double mnozstvi, int zboziId)
+    {
         Id = id;
         Ean = ean;
         Kod = kod;
@@ -69,28 +44,8 @@ public class C_Item {
         RozmerNazev = rozmerNazev;
         Cena = cena;
         Mnozstvi = mnozstvi;
-        LokacePozn = "";
-        SarzeId = 0;
-        Sarze = "";
         Stav = 0;
-        StavStr = "";
         ZboziId = zboziId;
-        Zvazeno = 0;
-        PolozkaId = 0;
-        Skryt = false;
-        Smaz = false;
-        LokaceId = lokaceId;
-        LokaceKod = lokaceKod;
-        Vyprodej = false;
-        ZakazObjednani = false;
-        Naktivni = false;
-        DodavatelId = 0;
-        NcPosledni = 0;
-        TemaId=0;
-        SkupinaId=0;
-        HlavniDodavatel = "";
-        PrumProdej = prumProdej;
-        MinOdber = minOdber;
         MnozVaha=0;
         ShowEditMnoz=false;
     }
@@ -114,28 +69,8 @@ public class C_Item {
         RozmerNazev = item.RozmerNazev;
         Cena = item.Cena;
         Mnozstvi = item.Mnozstvi;
-        LokacePozn = item.LokacePozn;
-        SarzeId = item.SarzeId;
-        Sarze = item.Sarze;
         Stav = item.Stav;
-        StavStr = item.StavStr;
         ZboziId = item.ZboziId;
-        Zvazeno = item.Zvazeno;
-        PolozkaId = item.PolozkaId;
-        Skryt = item.Skryt;
-        Smaz = item.Smaz;
-        LokaceId = item.LokaceId;
-        LokaceKod = item.LokaceKod;
-        Vyprodej = item.Vyprodej;
-        ZakazObjednani = item.ZakazObjednani;
-        Naktivni = item.Naktivni;
-        DodavatelId = item.DodavatelId;
-        NcPosledni = item.NcPosledni;
-        TemaId = item.TemaId;
-        SkupinaId = item.SkupinaId;
-        HlavniDodavatel = item.HlavniDodavatel;
-        PrumProdej = item.PrumProdej;
-        MinOdber = item.MinOdber;
         MnozVaha = item.MnozVaha;
         ShowEditMnoz = item.ShowEditMnoz;
     }
@@ -155,28 +90,8 @@ public class C_Item {
         RozmerNazev = "";
         Cena = 0;
         Mnozstvi = 0.0;
-        LokacePozn = "";
-        SarzeId = 0;
-        Sarze = "";
         Stav = 0;
-        StavStr = "";
         ZboziId = 0;
-        Zvazeno = 0;
-        PolozkaId = 0;
-        Skryt = false;
-        Smaz = false;
-        LokaceId = 0;
-        LokaceKod = "";
-        Vyprodej = false;
-        ZakazObjednani = false;
-        Naktivni = false;
-        DodavatelId = 0;
-        NcPosledni = 0;
-        TemaId = 0;
-        SkupinaId = 0;
-        HlavniDodavatel = "";
-        PrumProdej = 0;
-        MinOdber = 0;
         MnozVaha=0;
         ShowEditMnoz=false;
     }
