@@ -22,13 +22,16 @@ public class Api {
     private String _imei;
     private String _guid;
     private String _apiServer;
-    private  final String _http="http";
+    private String _sqlServer;
+    private String _database;
+    private  String _http="https";
     private Context _context;
 
 
     public  int Id;
     public  int Pocet;
     public String errorMsg;
+    public boolean isConnected;
 
     public  JSONObject respData;
     public  boolean reqFinished;
@@ -36,25 +39,68 @@ public class Api {
     OkHttpClient client;
     MediaType MEDIA_TYPE_JSON;
 
+    public void Init(String imei, String guid, String apiServer, boolean ssl, String sqlServer, String database, Context context) {
+        _imei = imei;
+        _guid = guid;
+        _apiServer = apiServer;
+        _sqlServer = sqlServer;
+        _database = database;
+        _context = context;
 
-    public boolean isClosed() {
-        return false;
-    }
+        if (ssl) {
+            _http = "https";
+            /*
+            TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
 
-    public void Init(String imei, String guid, String apiServer, Context context)
-    {
-        _imei=imei;
-        _guid=guid;
-        _apiServer=apiServer;
-        _context=context;
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
 
-        client = new OkHttpClient();
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new java.security.cert.X509Certificate[]{};
+                        }
+                    }
+            };
+
+            SSLContext sslContext = null;
+            try {
+                sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
+            newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
+            newBuilder.hostnameVerifier((hostname, session) -> true);
+
+            client = newBuilder.build();
+
+             */
+            client = new OkHttpClient();
+        } else {
+            _http = "http";
+            client = new OkHttpClient();
+        }
+
         MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
 
+        try {
+            isConnected = TestConnection();
+        } catch (Exception ex) {
+            errorMsg = ex.getMessage();
+        }
     }
 
     public String SP_MOBILNI_TERMINAL_toJSON(int retType, String typAkce, String pStr, int pInt, double pDec, String pStr2, int pInt2, int pInt3, double pDec2) {
         return "{" +
+                "  \"sqlServer\": \""+_sqlServer+"\"," +
+                "  \"database\": \""+_database+"\"," +
                 "  \"name\": \"usr_MOBILNI_TERMINAL\"," +
                 "  \"params\": [" +
                 "    { \"name\": \"@IMEI\", \"dataType\": \"char\", \"size\":255, \"value\": \"" + _imei + "\"}," +
@@ -74,6 +120,8 @@ public class Api {
 
     public String SP_MOBILNI_TERMINAL_ETI_toJSON(int retType, String typAkce, String pStr, int pInt) {
         return "{" +
+                "  \"sqlServer\": \""+_sqlServer+"\"," +
+                "  \"database\": \""+_database+"\"," +
                 "  \"name\": \"usr_MOBILNI_TERMINAL_ETI\"," +
                 "  \"params\": [" +
                 "    { \"name\": \"@IMEI\", \"dataType\": \"char\", \"size\":255, \"value\": \"" + _imei + "\"}," +
@@ -88,6 +136,8 @@ public class Api {
 
     public String SP_MOBILNI_LOGIN_toJSON(int retType, int typ, String heslo, String nazev, String poznamka, String telefon, String email, int skladId, String jazyk) {
         return "{" +
+                "  \"sqlServer\": \""+_sqlServer+"\"," +
+                "  \"database\": \""+_database+"\"," +
                 "  \"name\": \"usr_MOBILNI_LOGIN\"," +
                 "  \"params\": [" +
                 "    { \"name\": \"@TYP\",\"dataType\": \"int\",\"value\": \"" + typ + "\"}," +
@@ -258,7 +308,7 @@ public class Api {
         try {
             reqFinished = false;
             respData = null;
-            getRequest("info");
+            getRequest("info/"+_sqlServer+";"+_database);
             //
             long timeout = new Date().getTime();
             timeout += 4000;
@@ -284,116 +334,6 @@ public class Api {
         if (!errorMsg.equals("")) throw new Exception(errorMsg);
         return ret;
     }
-
-    /*
-    void getRequest(String cmd) throws IOException {
-        String[] param=new String[1];
-        param[0]=_http+"://"+_apiServer+"/"+cmd;
-        new HTTPGetReqTask().execute(param);
-    }
-
-    void postRequest(String postData) throws IOException {
-        String[] param=new String[2];
-        param[0]=_http+"://"+_apiServer+"/data";
-        param[1]=postData;
-        new HTTPPostReqTask().execute(param);
-    }
-
-    private class HTTPGetReqTask extends AsyncTask<String, Void, JSONObject> {
-        @Override
-        protected JSONObject doInBackground(String... params) {
-            HttpURLConnection urlConnection = null;
-            JSONObject respObj=null;
-
-            try {
-                URL url = new URL(params[0]);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                int code = urlConnection.getResponseCode();
-                if (code !=  200) {
-                    throw new IOException("Invalid response from server: " + code);
-                }
-
-                BufferedReader rd = new BufferedReader(new InputStreamReader(
-                        urlConnection.getInputStream()));
-                StringBuilder sb=new StringBuilder();
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
-                }
-                if (sb.length()>0) respObj = new JSONObject(sb.toString());
-                respData = respObj;
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                reqFinished=true;
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-            }
-            return respObj;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject result)
-        {
-            super.onPostExecute(result);
-        }
-    }
-
-    private class HTTPPostReqTask extends AsyncTask<String, Void, JSONObject> {
-        @Override
-        protected JSONObject doInBackground(String... params) {
-            JSONObject respObj=null;
-            HttpURLConnection urlConnection = null;
-            try {
-                URL url = new URL(params[0]);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("Content-Type", "application/json");
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoOutput(true);
-                urlConnection.setDoInput(true);
-                urlConnection.setChunkedStreamingMode(0);
-
-                OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
-                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-                        out, "UTF-8"));
-                writer.write(params[1]);
-                writer.flush();
-
-                int code = urlConnection.getResponseCode();
-                if (code !=  200) {
-                    throw new IOException("Invalid response from server: " + code);
-                }
-
-                BufferedReader rd = new BufferedReader(new InputStreamReader(
-                        urlConnection.getInputStream()));
-                StringBuilder sb=new StringBuilder();
-                String line;
-                while ((line = rd.readLine()) != null) {
-                    sb.append(line);
-                }
-                if (sb.length()>0) respObj = new JSONObject(sb.toString());
-                respData = respObj;
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                reqFinished=true;
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-            }
-            return respObj;
-        }
-
-        @Override
-        protected void onPostExecute(JSONObject result)
-        {
-            super.onPostExecute(result);
-            respData = result;
-        }
-    }
-    */
-
 
 }
 

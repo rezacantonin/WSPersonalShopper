@@ -27,7 +27,7 @@ public class ConnectionClass extends MainActivity {
     @SuppressLint("NewApi")
     public Connection CONN() {
         prefs = applicationContext.getSharedPreferences(PreferConst.SHARED_PREFS, MODE_PRIVATE);
-        server = prefs.getString(PreferConst.SERVER, "");
+        server = prefs.getString(PreferConst.SQL_SERVER, "");
         database = prefs.getString(PreferConst.DATABASE, "");
         server = server.replace("\\","&");
         String[] serverArray = server.split("&&", 2);

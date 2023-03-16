@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.app.FragmentManager;
 import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -38,7 +39,7 @@ public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Button btnPrihlas, btnCfg;
+    private Button btnSklad, btnCfg;
     private ImageButton btnBasket;
     private TextView tvStatus, tvTerminal, tvSklad, tvVerze;
     private ImageView imgWS, imgLogo;
@@ -49,9 +50,9 @@ public class MainActivity extends BaseActivity {
     private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
 
-    private String server, database, guid, terminal_nazev, androidID, sklad_nazev, error_code;
+    private String sqlServer, database, guid, terminal_nazev, androidID, sklad_nazev, apiServer;
     private int sklad_id, terminal_id;
-    private boolean presApi;
+    private boolean presApi, presApiSsl;
     private DataBridge db;
 
     private boolean connectionOK;
@@ -65,7 +66,7 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         appContext = getApplicationContext();
 
-        btnPrihlas = findViewById(R.id.btnPrihlas);
+        btnSklad = findViewById(R.id.btnSklad);
         btnBasket = findViewById(R.id.btnBasket);
         btnCfg = findViewById(R.id.btnCfg);
         tvStatus = findViewById(R.id.tvStatus);
@@ -107,17 +108,29 @@ public class MainActivity extends BaseActivity {
                 Intent basketIntent = new Intent(MainActivity.this, BasketActivity.class);
                 basketIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(basketIntent);
-                /*
-                overridePendingTransition(0, 0);
-                BasketActivity.startThisActivity(mContext);
-                 */
             }
         });
 
-        btnPrihlas.setOnLongClickListener(new View.OnLongClickListener() {
+        btnSklad.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 Heslo("Nastaveni skladu", "S" );
+                return false;
+            }
+        });
+
+        tvSklad.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Heslo("Nastaveni skladu", "S" );
+                return false;
+            }
+        });
+
+        tvStatus.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Pripojeni();
                 return false;
             }
         });
@@ -158,15 +171,17 @@ public class MainActivity extends BaseActivity {
 
     private void updateButtonState() {
         if (WSPersonalShopperApp.isInLockMode()) {
-            btnPrihlas.setText("D");
+            btnSklad.setText("D");
         } else {
-            btnPrihlas.setText("E");
+            btnSklad.setText("E");
         }
     }
 
     private void ProcesInicializace() {
+        apiServer = preferences.getString(PreferConst.API_SERVER, "");
         presApi = preferences.getBoolean(PreferConst.PRES_API, false);
-        server = preferences.getString(PreferConst.SERVER, "");
+        presApiSsl = preferences.getBoolean(PreferConst.PRES_API_SSL, false);
+        sqlServer = preferences.getString(PreferConst.SQL_SERVER, "");
         database = preferences.getString(PreferConst.DATABASE, "");
         terminal_id = preferences.getInt(PreferConst.TERMINAL_ID, 0);
         terminal_nazev = preferences.getString(PreferConst.TERMINAL_NAZEV, "");
@@ -183,30 +198,46 @@ public class MainActivity extends BaseActivity {
         }
         tvVerze.setText(version);
 
-        if (server.equals("")) NastavPripojeni();
+        if (sqlServer.equals("")) NastavPripojeni();
         else Pripojeni();
     }
 
     private void NastavPripojeni() {
+        FragmentManager fm = getSupportFragmentManager();
+        SettingFragmentDialog  settingFragmentDialog = SettingFragmentDialog.newInstance(presApi, presApiSsl, apiServer, sqlServer, database  );
+        settingFragmentDialog.setCancelable(false);
+        settingFragmentDialog.show(fm, "SettingFragmentDialog");
+
+        /*
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         alert.setTitle("Nastavení připojení");
 
         final CheckBox inputApi = new CheckBox(this);
-        final EditText inputServer = new EditText(this);
+        final CheckBox inputApiSsl = new CheckBox(this);
+        final EditText inputApiServer = new EditText(this);
+        final EditText inputSqlServer = new EditText(this);
         final EditText inputDB = new EditText(this);
         final TextView inApi = new TextView(this);
-        final TextView inServer = new TextView(this);
+        final TextView inApiSsl = new TextView(this);
+        final TextView inApiServer = new TextView(this);
+        final TextView inSqlServer = new TextView(this);
         final TextView inDB = new TextView(this);
         inApi.setText("Api");
-        inServer.setText("Server");
+        inApiSsl.setText("Ssl");
+        inApiServer.setText("API Server");
+        inSqlServer.setText("Server");
         inDB.setText("Databáze");
         LinearLayout ll = new LinearLayout(this);
         ll.setOrientation(LinearLayout.VERTICAL);
         ll.addView(inApi);
         ll.addView(inputApi);
-        ll.addView(inServer);
-        ll.addView(inputServer);
+        ll.addView(inApiSsl);
+        ll.addView(inputApiSsl);
+        ll.addView(inApiServer);
+        ll.addView(inputApiServer);
+        ll.addView(inSqlServer);
+        ll.addView(inputSqlServer);
         ll.addView(inDB);
         ll.addView(inputDB);
 
@@ -215,25 +246,33 @@ public class MainActivity extends BaseActivity {
         alert.setCancelable(false);
 
         inputApi.setChecked(presApi);
-        inputServer.setText(server);
+        inputApiSsl.setChecked(presApiSsl);
+        inputApiServer.setText(apiServer);
+        inputSqlServer.setText(sqlServer);
         inputDB.setText(database);
 
         alert.setPositiveButton("Nastavit", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
 
                 boolean edApi = inputApi.isChecked();
-                String edServer = inputServer.getText().toString();
+                boolean edApiSsl = inputApiSsl.isChecked();
+                String edApiServer = inputApiServer.getText().toString();
+                String edSqlServer = inputSqlServer.getText().toString();
                 String edDB = inputDB.getText().toString();
 
-                if (edServer == "") {
+                if (edSqlServer == "") {
                     Toast.makeText(MainActivity.this, "Server", Toast.LENGTH_SHORT);
                 } else if (edDB == "") {
                     Toast.makeText(MainActivity.this, "Databáze", Toast.LENGTH_SHORT);
                 } else {
                     presApi = edApi;
                     editor.putBoolean(PreferConst.PRES_API, presApi);
-                    server = edServer;
-                    editor.putString(PreferConst.SERVER, server);
+                    presApiSsl = edApiSsl;
+                    editor.putBoolean(PreferConst.PRES_API_SSL, presApiSsl);
+                    apiServer = edApiServer;
+                    editor.putString(PreferConst.API_SERVER, apiServer);
+                    sqlServer = edSqlServer;
+                    editor.putString(PreferConst.SQL_SERVER, sqlServer);
                     database = edDB;
                     editor.putString(PreferConst.DATABASE, database);
                     editor.apply();
@@ -246,23 +285,40 @@ public class MainActivity extends BaseActivity {
         alert.setNegativeButton("Zavřít", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                if (!preferences.contains(PreferConst.SERVER)) exit(0);
+                if (!preferences.contains(PreferConst.SQL_SERVER)) exit(0);
             }
         });
 
         alert.show();
+        */
+    }
+
+    public void SettingFragmentDialog_OK(boolean _api, boolean _apiSsl, String _apiServer, String _sqlServer, String _database) {
+        presApi = _api;
+        editor.putBoolean(PreferConst.PRES_API, presApi);
+        presApiSsl = _apiSsl;
+        editor.putBoolean(PreferConst.PRES_API_SSL, presApiSsl);
+        apiServer = _apiServer;
+        editor.putString(PreferConst.API_SERVER, apiServer);
+        sqlServer = _sqlServer;
+        editor.putString(PreferConst.SQL_SERVER, sqlServer);
+        database = _database;
+        editor.putString(PreferConst.DATABASE, database);
+        editor.apply();
+        //
+        Pripojeni();
     }
 
     private void Pripojeni() {
         btnBasket.setEnabled(false);
         int status = -1;
         String errMsg = "";
-        db = new DataBridge(androidID, guid, server, presApi, this);
+        connectionOK = false;
+        db = new DataBridge( this);
         try {
             if (db.isConnected()) connectionOK = true;
             else {
                 errMsg = db.ErrorMsg;
-                connectionOK = false;
             }
             if (connectionOK) {
                 try {
@@ -292,7 +348,7 @@ public class MainActivity extends BaseActivity {
             errMsg = ex.getMessage();
         } finally {
             if (!errMsg.isEmpty()) {
-                db.Close();
+                if (db!=null) db.Close();
                 Messages.ShowError(MainActivity.this, "Chyba", errMsg, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -414,7 +470,7 @@ public class MainActivity extends BaseActivity {
                     }
                     editor.apply();
 
-                    db.ReInit(androidID, guid, server, presApi, this);
+                    db.ReInit( this);
 
                     if (sklad_id == 0 || zobrSklad) NastaveniSkladu();
 

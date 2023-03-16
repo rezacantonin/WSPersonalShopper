@@ -49,13 +49,9 @@ public class BasketActivity extends BaseActivity  {
         setContentView(R.layout.activity_basket);
         //
         SharedPreferences preferencesBase = getApplicationContext().getSharedPreferences(PreferConst.SHARED_PREFS, MODE_PRIVATE);
-        String guid = preferencesBase.getString(PreferConst.GUID, "");
-        String androidID = preferencesBase.getString(PreferConst.ANDROID_ID, "");
-        String server = preferencesBase.getString(PreferConst.SERVER, "");
         int terminalId = preferencesBase.getInt(PreferConst.TERMINAL_ID, 0);
-        boolean presApi = preferencesBase.getBoolean(PreferConst.PRES_API, true);
         //
-        db=new DataBridge(androidID,guid,server,presApi, this);
+        db=new DataBridge( this);
         //
         ImageButton btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -119,6 +115,7 @@ public class BasketActivity extends BaseActivity  {
 
         basketItems = new ArrayList<>();
         tvNazev.setText("Košík "+terminalId);
+        tvCelkem.setText("0.00");
 
         adapter = new ItemsAdapter(this, basketItems);
         lvItems.setAdapter(adapter);

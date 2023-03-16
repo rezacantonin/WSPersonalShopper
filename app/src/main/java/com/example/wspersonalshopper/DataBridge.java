@@ -1,6 +1,8 @@
 package com.example.wspersonalshopper;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.provider.Settings;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -12,7 +14,8 @@ import java.sql.Statement;
 
 public class DataBridge {
 
-    private boolean presApi;
+    private boolean presApi, presApiSsl;
+    private String apiServer, sqlServer, database;
 
     private String guid;
     private String androidID;
@@ -34,16 +37,22 @@ public class DataBridge {
     public boolean ConnectErr;
     public  boolean hasRow;
 
-    public DataBridge(String _androidID, String _guid, String _apiServer, boolean _presApi, Context _context)
+    public DataBridge(Context _context)
     {
-        presApi=_presApi;
-        androidID=_androidID;
-        guid=_guid;
+        SharedPreferences preferences = _context.getSharedPreferences(PreferConst.SHARED_PREFS, _context.MODE_PRIVATE);
+        androidID = preferences.getString(PreferConst.ANDROID_ID, "");
+        guid = preferences.getString(PreferConst.GUID, "");
+        apiServer = preferences.getString(PreferConst.API_SERVER, "");
+        presApi = preferences.getBoolean(PreferConst.PRES_API, false);
+        presApiSsl = preferences.getBoolean(PreferConst.PRES_API_SSL, false);
+        sqlServer = preferences.getString(PreferConst.SQL_SERVER, "");
+        database = preferences.getString(PreferConst.DATABASE, "");
         //
+        ErrorMsg="";
         if (presApi)
         {
             api=new Api();
-            api.Init(androidID,guid,_apiServer,_context);
+            api.Init(androidID, guid, apiServer, presApiSsl, sqlServer, database, _context);
         }
         else
         {
@@ -52,20 +61,29 @@ public class DataBridge {
         }
     }
 
-    public void ReInit(String _androidID, String _guid, String _apiServer, boolean _presApi, Context _context) {
-        presApi = _presApi;
-        androidID = _androidID;
-        guid = _guid;
+    public void ReInit( Context _context) {
+        SharedPreferences preferencesBase = _context.getSharedPreferences(PreferConst.SHARED_PREFS, _context.MODE_PRIVATE);
+        guid = preferencesBase.getString(PreferConst.GUID, "");
+        androidID = preferencesBase.getString(PreferConst.ANDROID_ID, "");
+        sqlServer = preferencesBase.getString(PreferConst.SQL_SERVER, "");
+        database = preferencesBase.getString(PreferConst.DATABASE, "");
+        apiServer = preferencesBase.getString(PreferConst.API_SERVER, "");
+        presApi = preferencesBase.getBoolean(PreferConst.PRES_API, false);
+        presApiSsl = preferencesBase.getBoolean(PreferConst.PRES_API_SSL, false);
         if (presApi) {
-            api.Init(androidID, guid, _apiServer,_context);
+            api.Init(androidID, guid, apiServer, presApiSsl, sqlServer, database, _context);
         }
     }
 
     public boolean isConnected() {
         boolean res = false;
         try {
-            if (presApi)
-                res = api != null && api.TestConnection();
+            if (presApi) {
+                if (api != null) {
+                    if (api.TestConnection()) res = true;
+                    else ErrorMsg = api.errorMsg;
+                }
+            }
             else
                 res = connect != null && !connect.isClosed();
             ConnectErr = false;
