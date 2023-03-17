@@ -80,7 +80,7 @@ public class DataBridge {
         try {
             if (presApi) {
                 if (api != null) {
-                    if (api.TestConnection()) res = true;
+                    if (api.isConnected) res = true;
                     else ErrorMsg = api.errorMsg;
                 }
             }

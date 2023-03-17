@@ -302,7 +302,7 @@ public class Api {
         return ret;
     }
 
-    public boolean TestConnection() throws Exception {
+    private boolean TestConnection() throws Exception {
         boolean ret = false;
         errorMsg = "";
         try {

@@ -319,6 +319,18 @@ public class BasketActivity extends BaseActivity  {
                 }
             });
 
+            btnItemMnoz.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    aktItem=item;
+                    FragmentManager fm = getSupportFragmentManager();
+                    EditQuantFragmentDialog  editQuantFragmentDialog = EditQuantFragmentDialog.newInstance((int)item.Stav, (int)item.Mnozstvi);
+                    editQuantFragmentDialog.setCancelable(false);
+                    editQuantFragmentDialog.show(fm, "EditQuantFragmentDialog");
+                    return true;
+                }
+            });
+
             btnItemDel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
