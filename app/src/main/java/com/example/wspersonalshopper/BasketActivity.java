@@ -141,6 +141,21 @@ public class BasketActivity extends BaseActivity  {
         super.onPause();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (basketItems.size()>0) {
+            Messages.ShowQuestion(BasketActivity.this, "Upozornění", "Košík není prázdný\nOpravdu ukončit?", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    VymazVse();
+                    finish();
+                }
+            }, null);
+        }
+        else finish();
+    }
+
     public static void startThisActivity(Context context) {
         Intent intent = new Intent(context, BasketActivity.class);
         context.startActivity(intent);
@@ -287,8 +302,8 @@ public class BasketActivity extends BaseActivity  {
             Button btnItemMnoz=convertView.findViewById(R.id.btnItemMnoz);
             ImageButton btnItemDel=convertView.findViewById(R.id.btnItemDel);
             //
-            tvName.setText(Utils.df.format(item.Mnozstvi)+" "+item.Nazev);
-            tvCena.setText(Utils.dfCena.format(item.Cena));
+            tvName.setText(item.Nazev);
+            tvCena.setText(Utils.df.format(item.Mnozstvi)+" x "+ Utils.dfCena.format(item.Cena)+" = "+Utils.dfCena.format(item.Mnozstvi*item.Cena));
             //
             if (item.ShowEditMnoz)
             {

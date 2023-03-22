@@ -165,6 +165,7 @@ public class Api {
             @Override
             public void onFailure(Call call, IOException e) {
                 reqFinished=true;
+                errorMsg="Chyba spojení";
                 call.cancel();
             }
 
@@ -200,7 +201,7 @@ public class Api {
             @Override
             public void onFailure(Call call, IOException e) {
                 reqFinished=true;
-                errorMsg = e.getMessage();
+                errorMsg = "Chyba spojení";
                 call.cancel();
             }
 

@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class EditQuantFragmentDialog extends DialogFragment {
@@ -50,14 +51,14 @@ public class EditQuantFragmentDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.edit_quant_fragment_dialog, container, false);
 
+        TextView tvText = view.findViewById(R.id.tvEditQuantFragText);
         Button btnOK = view.findViewById(R.id.btnEditQuantFragOK);
         Button btnZpet = view.findViewById(R.id.btnEditQuantFragZpet);
         EditText edEditQuantFragMnozstvi = view.findViewById(R.id.edEditQuantFragMnozstvi);
         edEditQuantFragMnozstvi.setHint(String.valueOf( currQ));
-
+        tvText.setText("Zadejte množstvi ( max "+maxQ+" )");
 
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-
 
         /*
         InputMethodManager im = (InputMethodManager)getContext().getSystemService(getContext().INPUT_METHOD_SERVICE);
