@@ -259,7 +259,7 @@ public class BasketActivity extends BaseActivity  {
         final TextView adminPwTextView = new TextView(BasketActivity.this);
 
         adminPwTextView.setText("");
-        adminPasswordEdittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        adminPasswordEdittext.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         LinearLayout ll = new LinearLayout(BasketActivity.this);
         ll.setOrientation(LinearLayout.VERTICAL);
         ll.addView(adminPwTextView);
@@ -268,7 +268,7 @@ public class BasketActivity extends BaseActivity  {
         alertPw.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String heslo = adminPasswordEdittext.getText().toString();
-                if (heslo.matches("1596") || heslo.matches("defAdmPw")) {
+                if (heslo.matches("1596") ) {
                     PlatbaKosiku();
                 }
             }

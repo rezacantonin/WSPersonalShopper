@@ -512,7 +512,7 @@ public class MainActivity extends BaseActivity {
         final TextView adminPwTextView = new TextView(MainActivity.this);
 
         adminPwTextView.setText("");
-        adminPasswordEdittext.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        adminPasswordEdittext.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
         LinearLayout ll = new LinearLayout(MainActivity.this);
         ll.setOrientation(LinearLayout.VERTICAL);
         ll.addView(adminPwTextView);
@@ -521,7 +521,7 @@ public class MainActivity extends BaseActivity {
         alertPw.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String heslo = adminPasswordEdittext.getText().toString();
-                if (heslo.matches("1596") || heslo.matches("defAdmPw")) {
+                if (heslo.matches("1596")) {
                     if (param=="P") NastavPripojeni();
                     else Prihlaseni(true);
                 }
