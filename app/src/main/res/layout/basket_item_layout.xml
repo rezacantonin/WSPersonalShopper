@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/tvItemCena"
+        android:id="@+id/tvItemBarvaVel"
         android:layout_width="200dp"
         android:layout_height="21dp"
         android:layout_marginStart="8dp"
@@ -18,6 +18,18 @@
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvItemNazev" />
+
+    <TextView
+        android:id="@+id/tvItemCena"
+        android:layout_width="200dp"
+        android:layout_height="21dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="125,80"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvItemBarvaVel" />
 
     <TextView
         android:id="@+id/tvItemNazev"
@@ -63,7 +75,7 @@
         android:layout_height="40dp"
         android:background="@color/winshop_light_blue"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.25"
+        app:layout_constraintHorizontal_bias="0.245"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvItemCena"
         app:srcCompat="@drawable/btn_del" />

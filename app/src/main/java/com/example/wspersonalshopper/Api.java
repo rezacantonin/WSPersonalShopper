@@ -49,39 +49,6 @@ public class Api {
 
         if (ssl) {
             _http = "https";
-            /*
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                        }
-
-                        @Override
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                        }
-
-                        @Override
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new java.security.cert.X509Certificate[]{};
-                        }
-                    }
-            };
-
-            SSLContext sslContext = null;
-            try {
-                sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            OkHttpClient.Builder newBuilder = new OkHttpClient.Builder();
-            newBuilder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0]);
-            newBuilder.hostnameVerifier((hostname, session) -> true);
-
-            client = newBuilder.build();
-
-             */
             client = new OkHttpClient();
         } else {
             _http = "http";

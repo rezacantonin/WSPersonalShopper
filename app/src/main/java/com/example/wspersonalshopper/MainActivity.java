@@ -52,7 +52,7 @@ public class MainActivity extends BaseActivity {
 
     private String sqlServer, database, guid, terminal_nazev, androidID, sklad_nazev, apiServer;
     private int sklad_id, terminal_id;
-    private boolean presApi, presApiSsl;
+    private boolean presApi, presApiSsl, winShopStd;
     private DataBridge db;
 
     private boolean connectionOK;
@@ -105,9 +105,30 @@ public class MainActivity extends BaseActivity {
         btnBasket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent basketIntent = new Intent(MainActivity.this, BasketActivity.class);
-                basketIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                startActivity(basketIntent);
+                db.SetQuery_MOBILNI_TERMINAL(1, "PS_Test", "", 0, 0, "", 0, 0, 0);
+                try {
+                    if (db.ExecQuery()) {
+                        int res = db.getInt("VLOZENO");
+                        switch (res)
+                        {
+                            case -1 :
+                                Messages.ShowWarning(MainActivity.this, "Upozornění", "Košík je uzavřen", null);
+                                break;
+                            case 0 :
+                                Messages.ShowError(MainActivity.this, "Chyba", "Nelze provést kontrolu košíku", null);
+                                break;
+                            case 1 :
+                                Intent basketIntent = new Intent(MainActivity.this, BasketActivity.class);
+                                basketIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                                startActivity(basketIntent);
+                                break;
+                        }
+                    } else
+                        Messages.ShowError(MainActivity.this, "Chyba", "Nelze provést kontrolu košíku", null);
+                    db.CloseQuery();
+                } catch (Exception ex) {
+                    Messages.ShowError(MainActivity.this, "Chyba", "Nelze provést kontrolu košíku\n" + ex.getMessage(), null);
+                }
             }
         });
 
@@ -187,6 +208,7 @@ public class MainActivity extends BaseActivity {
         terminal_nazev = preferences.getString(PreferConst.TERMINAL_NAZEV, "");
         sklad_id = preferences.getInt(PreferConst.SKLAD, 0);
         sklad_nazev = preferences.getString(PreferConst.SKLAD_NAZEV, "");
+        winShopStd= preferences.getBoolean(PreferConst.WS_STD, false);
 
         tvTerminal.setText(terminal_nazev);
         tvSklad.setText(sklad_nazev);
@@ -204,12 +226,12 @@ public class MainActivity extends BaseActivity {
 
     private void NastavPripojeni() {
         FragmentManager fm = getSupportFragmentManager();
-        SettingFragmentDialog  settingFragmentDialog = SettingFragmentDialog.newInstance(presApi, presApiSsl, apiServer, sqlServer, database  );
+        SettingFragmentDialog  settingFragmentDialog = SettingFragmentDialog.newInstance(presApi, presApiSsl, apiServer, sqlServer, database,winShopStd  );
         settingFragmentDialog.setCancelable(false);
         settingFragmentDialog.show(fm, "SettingFragmentDialog");
     }
 
-    public void SettingFragmentDialog_OK(boolean _api, boolean _apiSsl, String _apiServer, String _sqlServer, String _database) {
+    public void SettingFragmentDialog_OK(boolean _api, boolean _apiSsl, String _apiServer, String _sqlServer, String _database, boolean _winShopStd) {
         presApi = _api;
         editor.putBoolean(PreferConst.PRES_API, presApi);
         presApiSsl = _apiSsl;
@@ -220,6 +242,8 @@ public class MainActivity extends BaseActivity {
         editor.putString(PreferConst.SQL_SERVER, sqlServer);
         database = _database;
         editor.putString(PreferConst.DATABASE, database);
+        winShopStd = _winShopStd;
+        editor.putBoolean(PreferConst.WS_STD, winShopStd);
         editor.apply();
         //
         Pripojeni();

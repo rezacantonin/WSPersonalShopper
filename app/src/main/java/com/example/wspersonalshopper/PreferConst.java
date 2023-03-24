@@ -13,6 +13,7 @@ public class PreferConst {
     public static final String PRES_API_SSL = "pres_api_ssl";
     public static final String TERMINAL_ID = "terminal_id";
     public static final String TERMINAL_NAZEV = "terminal_nazev";
+    public static final String WS_STD = "winshop_std";
 
     public static final String FTP_PASSIVE = "ftpPassive";
 

@@ -7,6 +7,17 @@
     tools:context=".MainActivity">
 
 
+    <CheckBox
+        android:id="@+id/chbSettingFragWsStd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="WS std"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
+
     <EditText
         android:id="@+id/edSettingFragDatabase"
         android:layout_width="0dp"
@@ -98,7 +109,7 @@
         android:id="@+id/chbSettingFragApiSsl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:text="Ssl"
         android:textColor="@color/black"

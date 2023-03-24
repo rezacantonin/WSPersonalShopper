@@ -41,6 +41,7 @@ public class BasketActivity extends BaseActivity  {
     private ItemsAdapter adapter;
 
     private boolean queryInProgress;
+    private boolean winShopStd;
     private DataBridge db;
 
     @Override
@@ -50,6 +51,7 @@ public class BasketActivity extends BaseActivity  {
         //
         SharedPreferences preferencesBase = getApplicationContext().getSharedPreferences(PreferConst.SHARED_PREFS, MODE_PRIVATE);
         int terminalId = preferencesBase.getInt(PreferConst.TERMINAL_ID, 0);
+        winShopStd = preferencesBase.getBoolean(PreferConst.WS_STD, false);
         //
         db=new DataBridge( this);
         //
@@ -95,7 +97,15 @@ public class BasketActivity extends BaseActivity  {
             @Override
             public void onClick(View v) {
                 if (basketItems.size()>0) {
-                    Heslo();
+                    Messages.ShowQuestion(BasketActivity.this, "Upozornění", "Opravdu košík uzavřít?", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            PlatbaKosiku();
+                        }
+                    }, null);
+                    //
+                    //Heslo();
                 }
             }
         });
@@ -180,7 +190,10 @@ public class BasketActivity extends BaseActivity  {
 
     private boolean Zapis(C_Item _item, double _mnozstvi ) {
         boolean pomRes=false;
-        db.SetQuery_MOBILNI_TERMINAL(1, "PS_VlozRadek", "", _item.ZboziId, _mnozstvi, "", 0, 0, 0);
+        if (winShopStd)
+            db.SetQuery_MOBILNI_TERMINAL(1, "PS_VlozRadek", _item.Kod, _item.BarvaId, _mnozstvi, _item.VelikostNazev, 0, 0, 0);
+        else
+            db.SetQuery_MOBILNI_TERMINAL(1, "PS_VlozRadek", "", _item.ZboziId, _mnozstvi, "", 0, 0, 0);
         try {
             if (db.ExecQuery()) {
                 boolean res = db.getInt("VLOZENO") != 0;
@@ -220,30 +233,23 @@ public class BasketActivity extends BaseActivity  {
 
     private void PlatbaKosiku()
     {
-        db.SetQuery_MOBILNI_TERMINAL(1, "PS_PlatbaKosiku", "", 0, 0, "", 0, 0, 0);
+        db.SetQuery_MOBILNI_TERMINAL(1, "PS_Uzavrit", "", 0, 0, "", 0, 0, 0);
         try {
             if (db.ExecQuery()) {
                 boolean res = db.getInt("VLOZENO") != 0;
                 if (!res)
-                    Messages.ShowError(BasketActivity.this, "Chyba", "Nelze košík načíst do pokladny", null);
+                    Messages.ShowError(BasketActivity.this, "Chyba", "Košík nelze uzavřít", null);
                 else {
-                    Messages.ShowQuestion(BasketActivity.this, "Platba", "Vymazat košík ?", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (VymazVse())
-                            {
-                                basketItems.clear();
-                                adapter.notifyDataSetChanged();
-                                tvCelkem.setText("0.00");
-                            }
-                        }
-                    },null);
+                    basketItems.clear();
+                    adapter.notifyDataSetChanged();
+                    tvCelkem.setText("0.00");
+                    finish();
                 }
             } else
-                Messages.ShowError(BasketActivity.this, "Chyba", "Nelze košík načíst do pokladny", null);
+                Messages.ShowError(BasketActivity.this, "Chyba", "Košík nelze uzavřít", null);
             db.CloseQuery();
         } catch (Exception ex) {
-            Messages.ShowError(BasketActivity.this, "Chyba", "Nelze košík načíst do pokladny\n" + ex.getMessage(), null);
+            Messages.ShowError(BasketActivity.this, "Chyba", "Košík nelze uzavřít\n" + ex.getMessage(), null);
         }
 
     }
@@ -297,6 +303,7 @@ public class BasketActivity extends BaseActivity  {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.basket_item_layout, parent, false);
             }
             TextView tvName = convertView.findViewById(R.id.tvItemNazev);
+            TextView tvBarvaVel = convertView.findViewById(R.id.tvItemBarvaVel);
             TextView tvCena = convertView.findViewById(R.id.tvItemCena);
             ImageButton btnItemShow=convertView.findViewById(R.id.btnItemShow);
             Button btnItemMnoz=convertView.findViewById(R.id.btnItemMnoz);
@@ -304,6 +311,11 @@ public class BasketActivity extends BaseActivity  {
             //
             tvName.setText(item.Nazev);
             tvCena.setText(Utils.df.format(item.Mnozstvi)+" x "+ Utils.dfCena.format(item.Cena)+" = "+Utils.dfCena.format(item.Mnozstvi*item.Cena));
+            if (item.BarvaNazev.isEmpty() && item.VelikostNazev.isEmpty()) tvBarvaVel.setVisibility(View.GONE);
+            else {
+                tvBarvaVel.setText(item.BarvaNazev + " " + item.VelikostNazev);
+                tvBarvaVel.setVisibility(View.VISIBLE);
+            }
             //
             if (item.ShowEditMnoz)
             {
@@ -420,8 +432,6 @@ public class BasketActivity extends BaseActivity  {
                     info.ErrorMsg = "chyba v API propojeni";
                     info.ConnectErr = true;
                 } else {
-                    //KOD_ZBOZI,NAZEV_ZBOZI,ID_VELIKOSTI,NAZEV_VELIKOSTI,ID_BARVY,NAZEV_BARVY,ID_DELKY,NAZEV_DELKY, ID_ROZMERU, NAZEV_ROZMERU, PC, STAV, STAV_KS, POZICE_TEXT,ZBOZI_ID
-                    // VYPRODEJ, ZAKAZ_OBJEDNAVANI, NEAKTIVNI_POLOZKA, ID_DODAVATEL,NC_POSLEDNI, TEMA_ID, SKUPINA_ID
                     double mnozVaha=0;
                     if (ean.length()==13 && (ean.substring(0,2).equals("28") || ean.substring(0,2).equals("29")) ) {
                         mnozVaha = Double.parseDouble(ean.substring(6, 12))/1000;
@@ -432,16 +442,16 @@ public class BasketActivity extends BaseActivity  {
                         try {
                             if (db.hasRow) {
                                 info.item.Ean = ean;
-                                info.item.Kod = db.getString("KOD_ZBOZI");
-                                info.item.Nazev = db.getString("NAZEV_ZBOZI");
+                                info.item.Kod = db.getString("KOD_ZBOZI").trim();
+                                info.item.Nazev = db.getString("NAZEV_ZBOZI").trim();
                                 info.item.VelikostId = db.getInt("ID_VELIKOSTI");
-                                info.item.VelikostNazev = db.getString("NAZEV_VELIKOSTI");
+                                info.item.VelikostNazev = db.getString("NAZEV_VELIKOSTI").trim();
                                 info.item.BarvaId = db.getInt("ID_BARVY");
-                                info.item.BarvaNazev = db.getString("NAZEV_BARVY");
+                                info.item.BarvaNazev = db.getString("NAZEV_BARVY").trim();
                                 info.item.DelkaId = db.getInt("ID_DELKY");
-                                info.item.DelkaNazev = db.getString("NAZEV_DELKY");
+                                info.item.DelkaNazev = db.getString("NAZEV_DELKY").trim();
                                 info.item.RozmerId = db.getInt("ID_ROZMERU");
-                                info.item.RozmerNazev = db.getString("NAZEV_ROZMERU");
+                                info.item.RozmerNazev = db.getString("NAZEV_ROZMERU").trim();
                                 //info.item.Cena = rs.getDouble(11);
                                 info.item.Stav = db.getDouble("STAV_KS") - db.getDouble("MNOZ_ZASOBNIK");;
                                 info.item.ZboziId = db.getInt("ZBOZI_ID");
@@ -480,7 +490,9 @@ public class BasketActivity extends BaseActivity  {
                     //
                     boolean nasel = false;
                     for (C_Item i : basketItems) {
-                        if (i.Ean.equals(info.item.Ean)) {
+                        if (i.ZboziId==info.item.ZboziId && i.Kod.equals(info.item.Kod)
+                           && i.VelikostId==info.item.VelikostId && i.VelikostNazev.equals(info.item.VelikostNazev)
+                           && i.BarvaId==info.item.BarvaId && i.BarvaNazev.equals(info.item.BarvaNazev)) {
                             nasel = true;
                             i.ShowEditMnoz = true;
                             if (info.item.Stav>=i.Mnozstvi + info.item.Mnozstvi) {

@@ -24,18 +24,21 @@ public class SettingFragmentDialog extends DialogFragment {
     private static final String ARG_API_SERVER = "API_SERVER";
     private static final String ARG_SQL_SERVER = "SQL_SERVER";
     private static final String ARG_DATABASE = "DATABASE";
+    private static final String ARG_WS_STD = "WS_STD";
+
 
     private boolean api;
     private boolean apiSsl;
     private String apiServer;
     private String sqlServer;
     private String database;
+    private boolean winShopStd;
 
     public SettingFragmentDialog() {
         // Required empty public constructor
     }
 
-    public static SettingFragmentDialog newInstance(boolean _api, boolean _apiSsl, String _apiServer, String _sqlServer, String _database) {
+    public static SettingFragmentDialog newInstance(boolean _api, boolean _apiSsl, String _apiServer, String _sqlServer, String _database, boolean _winShopStd) {
         SettingFragmentDialog fragment = new SettingFragmentDialog();
         Bundle args = new Bundle();
         args.putBoolean(ARG_API, _api);
@@ -43,6 +46,7 @@ public class SettingFragmentDialog extends DialogFragment {
         args.putString(ARG_API_SERVER, _apiServer);
         args.putString(ARG_SQL_SERVER, _sqlServer);
         args.putString(ARG_DATABASE, _database);
+        args.putBoolean(ARG_WS_STD, _winShopStd);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,6 +60,7 @@ public class SettingFragmentDialog extends DialogFragment {
             apiServer = getArguments().getString(ARG_API_SERVER);
             sqlServer = getArguments().getString(ARG_SQL_SERVER);
             database = getArguments().getString(ARG_DATABASE);
+            winShopStd = getArguments().getBoolean(ARG_WS_STD);
         }
     }
 
@@ -67,12 +72,14 @@ public class SettingFragmentDialog extends DialogFragment {
         Button btnZpet = view.findViewById(R.id.btnSettingFragZpet);
         CheckBox chbApi= view.findViewById(R.id.chbSettingFragApi);
         CheckBox chbApiSsl= view.findViewById(R.id.chbSettingFragApiSsl);
+        CheckBox chbWsStd= view.findViewById(R.id.chbSettingFragWsStd);
         EditText edApiServer= view.findViewById(R.id.edSettingFragApiServer);
         EditText edSqlServer= view.findViewById(R.id.edSettingFragSqlServer);
         EditText edDatabase= view.findViewById(R.id.edSettingFragDatabase);
 
         chbApi.setChecked(api);
         chbApiSsl.setChecked(apiSsl);
+        chbWsStd.setChecked(winShopStd);
         edApiServer.setText(apiServer);
         edSqlServer.setText(sqlServer);
         edDatabase.setText(database);
@@ -85,7 +92,8 @@ public class SettingFragmentDialog extends DialogFragment {
                 apiServer = edApiServer.getText().toString();
                 sqlServer = edSqlServer.getText().toString();
                 database = edDatabase.getText().toString();
-                ((MainActivity)getActivity()).SettingFragmentDialog_OK(api, apiSsl, apiServer, sqlServer, database);
+                winShopStd = chbWsStd.isChecked();
+                ((MainActivity)getActivity()).SettingFragmentDialog_OK(api, apiSsl, apiServer, sqlServer, database, winShopStd);
                 getDialog().dismiss();
             }
         });
