@@ -8,8 +8,10 @@ public class C_Item {
     public String Kod;
     public String Nazev;
     public int VelikostId;
+    public String VelikostIdStr;
     public String VelikostNazev;
     public int BarvaId;
+    public String BarvaIdStr;
     public String BarvaNazev;
     public int DelkaId;
     public String DelkaNazev;
@@ -27,7 +29,7 @@ public class C_Item {
         Clear();
     }
 
-    public C_Item(int id, String ean, String kod, String nazev, int velikostId, String velikostNazev, int barvaId, String barvaNazev,
+    public C_Item(int id, String ean, String kod, String nazev, int velikostId, String velikostIdStr, String velikostNazev, int barvaId, String barvaIdStr, String barvaNazev,
                   int delkaId, String delkaNazev, int rozmerId, String rozmerNazev, double cena, Double mnozstvi, int zboziId)
     {
         Id = id;
@@ -35,8 +37,10 @@ public class C_Item {
         Kod = kod;
         Nazev = nazev;
         VelikostId = velikostId;
+        VelikostIdStr = velikostIdStr;
         VelikostNazev = velikostNazev;
         BarvaId = barvaId;
+        BarvaIdStr = barvaIdStr;
         BarvaNazev = barvaNazev;
         DelkaId = delkaId;
         DelkaNazev = delkaNazev;
@@ -60,8 +64,10 @@ public class C_Item {
         Kod = item.Kod;
         Nazev = item.Nazev;
         VelikostId = item.VelikostId;
+        VelikostIdStr = item.VelikostIdStr;
         VelikostNazev = item.VelikostNazev;
         BarvaId = item.BarvaId;
+        BarvaIdStr = item.BarvaIdStr;
         BarvaNazev = item.BarvaNazev;
         DelkaId = item.DelkaId;
         DelkaNazev = item.DelkaNazev;
@@ -81,8 +87,10 @@ public class C_Item {
         Kod = "";
         Nazev = "";
         VelikostId = 0;
+        VelikostIdStr = "";
         VelikostNazev = "";
         BarvaId = 0;
+        BarvaIdStr = "";
         BarvaNazev = "";
         DelkaId = 0;
         DelkaNazev = "";

@@ -64,6 +64,28 @@ public class Api {
         }
     }
 
+    public String SP_MOBILNI_TERMINAL_toJSON_Std(int retType, String typAkce, String pStr, int pInt, double pDec, String pStr2, int pInt2, int pInt3, double pDec2, String pStr3) {
+        return "{" +
+                "  \"sqlServer\": \""+_sqlServer+"\"," +
+                "  \"database\": \""+_database+"\"," +
+                "  \"name\": \"usr_MOBILNI_TERMINAL\"," +
+                "  \"params\": [" +
+                "    { \"name\": \"@IMEI\", \"dataType\": \"char\", \"size\":255, \"value\": \"" + _imei + "\"}," +
+                "    { \"name\": \"@GUID\",\"dataType\": \"char\",\"size\":40,\"value\": \"" + _guid + "\"}," +
+                "    { \"name\": \"@TYP_AKCE\",\"dataType\": \"char\",\"size\":255,\"value\": \"" + typAkce + "\"}," +
+                "    { \"name\": \"@P_STR\",\"dataType\": \"char\",\"size\":255,\"value\": \"" + pStr + "\"}," +
+                "    { \"name\": \"@P_INT\",\"dataType\": \"int\",\"value\": \"" + pInt + "\"}," +
+                "    { \"name\": \"@P_DEC\",\"dataType\": \"dec\",\"value\": \"" + pDec + "\"}," +
+                "    { \"name\": \"@P_STR_2\",\"dataType\": \"char\",\"size\":255,\"value\": \"" + pStr2 + "\"}," +
+                "    { \"name\": \"@P_INT_2\",\"dataType\": \"int\",\"value\": \"" + pInt2 + "\"}," +
+                "    { \"name\": \"@P_INT_3\",\"dataType\": \"int\",\"value\": \"" + pInt3 + "\"}," +
+                "    { \"name\": \"@P_DEC_2\",\"dataType\": \"dec\",\"value\": \"" + pDec2 + "\"}," +
+                "    { \"name\": \"@P_STR_3\",\"dataType\": \"char\",\"size\":255,\"value\": \"" + pStr3 + "\"}" +
+                "  ]," +
+                "  \"retType\": " + retType + "" +
+                "}";
+    }
+
     public String SP_MOBILNI_TERMINAL_toJSON(int retType, String typAkce, String pStr, int pInt, double pDec, String pStr2, int pInt2, int pInt3, double pDec2) {
         return "{" +
                 "  \"sqlServer\": \""+_sqlServer+"\"," +
@@ -80,22 +102,6 @@ public class Api {
                 "    { \"name\": \"@P_INT_2\",\"dataType\": \"int\",\"value\": \"" + pInt2 + "\"}," +
                 "    { \"name\": \"@P_INT_3\",\"dataType\": \"int\",\"value\": \"" + pInt3 + "\"}," +
                 "    { \"name\": \"@P_DEC_2\",\"dataType\": \"dec\",\"value\": \"" + pDec2 + "\"}" +
-                "  ]," +
-                "  \"retType\": " + retType + "" +
-                "}";
-    }
-
-    public String SP_MOBILNI_TERMINAL_ETI_toJSON(int retType, String typAkce, String pStr, int pInt) {
-        return "{" +
-                "  \"sqlServer\": \""+_sqlServer+"\"," +
-                "  \"database\": \""+_database+"\"," +
-                "  \"name\": \"usr_MOBILNI_TERMINAL_ETI\"," +
-                "  \"params\": [" +
-                "    { \"name\": \"@IMEI\", \"dataType\": \"char\", \"size\":255, \"value\": \"" + _imei + "\"}," +
-                "    { \"name\": \"@GUID\",\"dataType\": \"char\",\"size\":40,\"value\": \"" + _guid + "\"}," +
-                "    { \"name\": \"@TYP_AKCE\",\"dataType\": \"char\",\"size\":255,\"value\": \"" + typAkce + "\"}," +
-                "    { \"name\": \"@P_STR\",\"dataType\": \"char\",\"size\":255,\"value\": \"" + pStr + "\"}," +
-                "    { \"name\": \"@P_INT\",\"dataType\": \"int\",\"value\": \"" + pInt + "\"}" +
                 "  ]," +
                 "  \"retType\": " + retType + "" +
                 "}";

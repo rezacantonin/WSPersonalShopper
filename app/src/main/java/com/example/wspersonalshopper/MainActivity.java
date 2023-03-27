@@ -105,7 +105,7 @@ public class MainActivity extends BaseActivity {
         btnBasket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                db.SetQuery_MOBILNI_TERMINAL(1, "PS_Test", "", 0, 0, "", 0, 0, 0);
+                db.SetQuery_MOBILNI_TERMINAL(1, "PS_Test", "", 0, 0, "", 0, 0, 0,"");
                 try {
                     if (db.ExecQuery()) {
                         int res = db.getInt("VLOZENO");
@@ -120,7 +120,43 @@ public class MainActivity extends BaseActivity {
                             case 1 :
                                 Intent basketIntent = new Intent(MainActivity.this, BasketActivity.class);
                                 basketIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                                //Bundle b = new Bundle();
+                                //b.putBoolean("nacti",false);
+                                basketIntent.putExtra("nacti",false);
                                 startActivity(basketIntent);
+                                break;
+                            case 2:
+                                Messages.ShowQuestion(MainActivity.this, "Dotaz", "Košík není prázdný", "Načíst", "Vymazat", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Intent basketIntent = new Intent(MainActivity.this, BasketActivity.class);
+                                        basketIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                                        basketIntent.putExtra("nacti",true);
+                                        startActivity(basketIntent);
+                                    }
+                                }, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        db.SetQuery_MOBILNI_TERMINAL(1, "PS_VymazVse", "", 0, 0, "", 0, 0, 0,"");
+                                        try {
+                                            if (db.ExecQuery()) {
+                                                boolean res = db.getInt("VLOZENO") != 0;
+                                                if (!res)
+                                                    Messages.ShowError(MainActivity.this, "Chyba", "Nelze vymazat položky košíku", null);
+                                                else {
+                                                    Intent basketIntent = new Intent(MainActivity.this, BasketActivity.class);
+                                                    basketIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                                                    basketIntent.putExtra("nacti",false);
+                                                    startActivity(basketIntent);
+                                                }
+                                            } else
+                                                Messages.ShowError(MainActivity.this, "Chyba", "Nelze vymazat položky košíku", null);
+                                            db.CloseQuery();
+                                        } catch (Exception ex) {
+                                            Messages.ShowError(MainActivity.this, "Chyba", "Nelze zapsat vymazat položky\n" + ex.getMessage(), null);
+                                        }
+                                    }
+                                });
                                 break;
                         }
                     } else

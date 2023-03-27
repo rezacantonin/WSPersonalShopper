@@ -14,7 +14,7 @@ import java.sql.Statement;
 
 public class DataBridge {
 
-    private boolean presApi, presApiSsl;
+    private boolean presApi, presApiSsl, winShopStd;
     private String apiServer, sqlServer, database;
 
     private String guid;
@@ -47,6 +47,7 @@ public class DataBridge {
         presApiSsl = preferences.getBoolean(PreferConst.PRES_API_SSL, false);
         sqlServer = preferences.getString(PreferConst.SQL_SERVER, "");
         database = preferences.getString(PreferConst.DATABASE, "");
+        winShopStd = preferences.getBoolean(PreferConst.WS_STD, false);
         //
         ErrorMsg="";
         if (presApi)
@@ -62,14 +63,15 @@ public class DataBridge {
     }
 
     public void ReInit( Context _context) {
-        SharedPreferences preferencesBase = _context.getSharedPreferences(PreferConst.SHARED_PREFS, _context.MODE_PRIVATE);
-        guid = preferencesBase.getString(PreferConst.GUID, "");
-        androidID = preferencesBase.getString(PreferConst.ANDROID_ID, "");
-        sqlServer = preferencesBase.getString(PreferConst.SQL_SERVER, "");
-        database = preferencesBase.getString(PreferConst.DATABASE, "");
-        apiServer = preferencesBase.getString(PreferConst.API_SERVER, "");
-        presApi = preferencesBase.getBoolean(PreferConst.PRES_API, false);
-        presApiSsl = preferencesBase.getBoolean(PreferConst.PRES_API_SSL, false);
+        SharedPreferences preferences = _context.getSharedPreferences(PreferConst.SHARED_PREFS, _context.MODE_PRIVATE);
+        guid = preferences.getString(PreferConst.GUID, "");
+        androidID = preferences.getString(PreferConst.ANDROID_ID, "");
+        sqlServer = preferences.getString(PreferConst.SQL_SERVER, "");
+        database = preferences.getString(PreferConst.DATABASE, "");
+        apiServer = preferences.getString(PreferConst.API_SERVER, "");
+        presApi = preferences.getBoolean(PreferConst.PRES_API, false);
+        presApiSsl = preferences.getBoolean(PreferConst.PRES_API_SSL, false);
+        winShopStd = preferences.getBoolean(PreferConst.WS_STD, false);
         if (presApi) {
             api.Init(androidID, guid, apiServer, presApiSsl, sqlServer, database, _context);
         }
@@ -93,20 +95,19 @@ public class DataBridge {
         return res;
     }
 
-    public void SetQuery_MOBILNI_TERMINAL(int _retType, String typAkce, String pStr, int pInt, double pDec, String pStr2, int pInt2, int pInt3, double pDec2) {
+    public void SetQuery_MOBILNI_TERMINAL(int _retType, String typAkce, String pStr, int pInt, double pDec, String pStr2, int pInt2, int pInt3, double pDec2, String pStr3) {
         retType = _retType;
         if (presApi)
-            query = api.SP_MOBILNI_TERMINAL_toJSON(_retType, typAkce, pStr, pInt, pDec, pStr2, pInt2, pInt2, pDec2);
-        else
-            query = "exec usr_MOBILNI_TERMINAL '" + androidID + "','" + guid + "','" + typAkce + "','" + pStr + "'," + pInt + "," + pDec + ",'" + pStr2 + "'," + pInt2 + "," + pInt3 + "," + pDec2;
-    }
-
-    public void SetQuery_MOBILNI_TERMINAL_ETI(int _retType, String typAkce, String pStr, int pInt) {
-        retType = _retType;
-        if (presApi)
-            query = api.SP_MOBILNI_TERMINAL_ETI_toJSON(_retType, typAkce, pStr, pInt);
-        else
-            query = "exec usr_MOBILNI_TERMINAL_ETI '" + androidID + "','" + guid + "','" + typAkce + "','" + pStr + "'," + pInt;
+            if (winShopStd)
+                query = api.SP_MOBILNI_TERMINAL_toJSON_Std(_retType, typAkce, pStr, pInt, pDec, pStr2, pInt2, pInt2, pDec2, pStr3);
+            else
+                query = api.SP_MOBILNI_TERMINAL_toJSON(_retType, typAkce, pStr, pInt, pDec, pStr2, pInt2, pInt2, pDec2);
+        else {
+            if (winShopStd)
+                query = "exec usr_MOBILNI_TERMINAL '" + androidID + "','" + guid + "','" + typAkce + "','" + pStr + "'," + pInt + "," + pDec + ",'" + pStr2 + "'," + pInt2 + "," + pInt3 + "," + pDec2+",'"+pStr3+"'";
+            else
+                query = "exec usr_MOBILNI_TERMINAL '" + androidID + "','" + guid + "','" + typAkce + "','" + pStr + "'," + pInt + "," + pDec + ",'" + pStr2 + "'," + pInt2 + "," + pInt3 + "," + pDec2;
+        }
     }
 
     public void SetQuery_MOBILNI_LOGIN(int _retType, int typ, String heslo, String nazev, String poznamka, String telefon, String email, int skladId, String jazyk) {

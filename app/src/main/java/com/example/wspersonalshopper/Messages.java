@@ -47,6 +47,16 @@ public class Messages {
         dialog.show();
     }
 
+    public static void ShowQuestion(Context context, String title, String message, String textBtnOk, String textBtnEsc,  DialogInterface.OnClickListener onClickListenerOK, DialogInterface.OnClickListener onClickListenerESC) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+        dialog.setTitle(title);
+        dialog.setMessage(message);
+        dialog.setIcon(R.drawable.msg_dotaz);
+        dialog.setPositiveButton(textBtnOk, onClickListenerOK);
+        dialog.setNegativeButton(textBtnEsc, onClickListenerESC);
+        dialog.show();
+    }
+
     private static void ShowAlertProc(Context context, String title, String message, DialogInterface.OnClickListener onClickListener, boolean beep ) {
         if (beep) {
             MediaPlayer mp = MediaPlayer.create(context, R.raw.beep_01a);
