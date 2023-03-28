@@ -270,7 +270,7 @@ public class BasketActivity extends BaseActivity  {
 
     private void PlatbaKosiku()
     {
-        db.SetQuery_MOBILNI_TERMINAL(1, "PS_Uzavrit", "", 0, 0, "", 0, 0, 0,"");
+        db.SetQuery_MOBILNI_TERMINAL(1, "PS_Uzavrit", "", 1, 0, "", 0, 0, 0,"");
         try {
             if (db.ExecQuery()) {
                 boolean res = db.getInt("VLOZENO") != 0;
