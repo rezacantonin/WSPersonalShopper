@@ -39,7 +39,7 @@ public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Button btnSklad, btnCfg;
+    private Button btnCfg;
     private ImageButton btnBasket;
     private TextView tvStatus, tvTerminal, tvSklad, tvVerze, tvIdTerminalu;
     private ImageView imgWS, imgLogo;
@@ -66,7 +66,6 @@ public class MainActivity extends BaseActivity {
         setContentView(R.layout.activity_main);
         appContext = getApplicationContext();
 
-        btnSklad = findViewById(R.id.btnSklad);
         btnBasket = findViewById(R.id.btnBasket);
         btnCfg = findViewById(R.id.btnCfg);
         tvStatus = findViewById(R.id.tvStatus);
@@ -167,18 +166,10 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        btnBasket.setOnLongClickListener(new View.OnLongClickListener() {
+        tvIdTerminalu.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 Heslo("Uzavření košíku","K");
-                return false;
-            }
-        });
-
-        btnSklad.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                Heslo("Nastaveni skladu", "S" );
                 return false;
             }
         });
@@ -202,8 +193,7 @@ public class MainActivity extends BaseActivity {
         imgWS.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                enableKioskMode(!WSPersonalShopperApp.isInLockMode());
-                updateButtonState();
+                Heslo("Kiosk mode", "X" );
                 return false;
             }
         });
@@ -235,9 +225,9 @@ public class MainActivity extends BaseActivity {
 
     private void updateButtonState() {
         if (WSPersonalShopperApp.isInLockMode()) {
-            btnSklad.setText("D");
+
         } else {
-            btnSklad.setText("E");
+
         }
     }
 
@@ -310,16 +300,24 @@ public class MainActivity extends BaseActivity {
                         status = db.getInt("VSTUP");
                         byte[] encodedBytes = new byte[0];
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                            encodedBytes = Base64.getDecoder().decode(db.getString("LOGO"));
-                            Bitmap logo = BitmapFactory.decodeByteArray(encodedBytes, 0, encodedBytes.length);
-                            if (logo == null) {
+                            try {
+                                encodedBytes = Base64.getDecoder().decode(db.getString("LOGO"));
+                                Bitmap logo = BitmapFactory.decodeByteArray(encodedBytes, 0, encodedBytes.length);
+                                if (logo == null) {
+                                    tvIdTerminalu.setVisibility(View.VISIBLE);
+                                    tvIdTerminalu.setText(String.valueOf(terminal_id));
+                                    imgLogo.setVisibility(View.GONE);
+                                } else {
+                                    tvIdTerminalu.setVisibility(View.GONE);
+                                    imgLogo.setVisibility(View.VISIBLE);
+                                    imgLogo.setImageBitmap(logo);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
                                 tvIdTerminalu.setVisibility(View.VISIBLE);
                                 tvIdTerminalu.setText(String.valueOf(terminal_id));
                                 imgLogo.setVisibility(View.GONE);
-                            } else {
-                                tvIdTerminalu.setVisibility(View.GONE);
-                                imgLogo.setVisibility(View.VISIBLE);
-                                imgLogo.setImageBitmap(logo);
                             }
                         }
                         else
@@ -597,31 +595,43 @@ public class MainActivity extends BaseActivity {
         alertPw.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String heslo = adminPasswordEdittext.getText().toString();
-                if (heslo.matches("1596")) {
-                    switch (param)
-                    {
-                        case "P" : NastavPripojeni(); break;
-                        case "S" : Prihlaseni(true); break;
-                        case "K" :
-                            db.SetQuery_MOBILNI_TERMINAL(1, "PS_Uzavrit", "", 0, 0, "", 0, 0, 0,"");
-                            try {
-                                if (db.ExecQuery()) {
-                                    boolean res = db.getInt("VLOZENO") != 0;
-                                    if (!res)
-                                        Messages.ShowError(MainActivity.this, "Chyba", "Nelze zrušit uzavření košíku", null);
-                                    else {
-                                        Intent basketIntent = new Intent(MainActivity.this, BasketActivity.class);
-                                        basketIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                                        basketIntent.putExtra("nacti",true);
-                                        startActivity(basketIntent);
-                                    }
-                                } else
+                if (param=="K")
+                {
+                    if (heslo.matches("9876")) {
+                        db.SetQuery_MOBILNI_TERMINAL(1, "PS_Uzavrit", "", 0, 0, "", 0, 0, 0, "");
+                        try {
+                            if (db.ExecQuery()) {
+                                boolean res = db.getInt("VLOZENO") != 0;
+                                if (!res)
                                     Messages.ShowError(MainActivity.this, "Chyba", "Nelze zrušit uzavření košíku", null);
-                                db.CloseQuery();
-                            } catch (Exception ex) {
-                                Messages.ShowError(MainActivity.this, "Chyba", "Nelze zrušit uzavření košíku\n" + ex.getMessage(), null);
-                            }
-                            break;
+                                else {
+                                    Intent basketIntent = new Intent(MainActivity.this, BasketActivity.class);
+                                    basketIntent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                                    basketIntent.putExtra("nacti", true);
+                                    startActivity(basketIntent);
+                                }
+                            } else
+                                Messages.ShowError(MainActivity.this, "Chyba", "Nelze zrušit uzavření košíku", null);
+                            db.CloseQuery();
+                        } catch (Exception ex) {
+                            Messages.ShowError(MainActivity.this, "Chyba", "Nelze zrušit uzavření košíku\n" + ex.getMessage(), null);
+                        }
+                    }
+                }
+                else {
+                    if (heslo.matches("1596")) {
+                        switch (param) {
+                            case "P":
+                                NastavPripojeni();
+                                break;
+                            case "S":
+                                Prihlaseni(true);
+                                break;
+                            case "X":
+                                enableKioskMode(!WSPersonalShopperApp.isInLockMode());
+                                updateButtonState();
+                                break;
+                        }
                     }
                 }
             }

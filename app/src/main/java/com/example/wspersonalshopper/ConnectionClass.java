@@ -25,7 +25,7 @@ public class ConnectionClass extends MainActivity {
     String z="";
 
     @SuppressLint("NewApi")
-    public Connection CONN() {
+    public Connection CONN(Context _context) {
         prefs = applicationContext.getSharedPreferences(PreferConst.SHARED_PREFS, MODE_PRIVATE);
         server = prefs.getString(PreferConst.SQL_SERVER, "");
         database = prefs.getString(PreferConst.DATABASE, "");
@@ -56,12 +56,7 @@ public class ConnectionClass extends MainActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
-            z = e.getMessage();
-            if (z.contains("Network error IOException: failed to connect to")||(z.contains("connect failed: ECONNREFUSED (Connection refused)"))){
-
-            }else{
-
-            }
+            Messages.ShowError(_context,"Nelze se připojit",e.getMessage(),null);
             System.out.println(resultSet);
             z = "the end";
         }

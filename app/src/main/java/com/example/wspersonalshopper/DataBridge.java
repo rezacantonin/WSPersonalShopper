@@ -36,6 +36,7 @@ public class DataBridge {
     public String ErrorMsg;
     public boolean ConnectErr;
     public  boolean hasRow;
+    private  Context context;
 
     public DataBridge(Context _context)
     {
@@ -48,6 +49,7 @@ public class DataBridge {
         sqlServer = preferences.getString(PreferConst.SQL_SERVER, "");
         database = preferences.getString(PreferConst.DATABASE, "");
         winShopStd = preferences.getBoolean(PreferConst.WS_STD, false);
+        context=_context;
         //
         ErrorMsg="";
         if (presApi)
@@ -58,7 +60,7 @@ public class DataBridge {
         else
         {
             connectClass = new ConnectionClass();
-            connect = connectClass.CONN();
+            connect = connectClass.CONN(context);
         }
     }
 
@@ -273,7 +275,7 @@ public class DataBridge {
     }
 
     public boolean Reconnect() {
-        if (presApi) connect = connectClass.CONN();
+        if (presApi) connect = connectClass.CONN(context);
         return (isConnected());
     }
 
