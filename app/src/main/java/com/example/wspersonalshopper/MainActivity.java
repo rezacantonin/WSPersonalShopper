@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity {
 
     private Button btnCfg;
     private ImageButton btnBasket;
-    private TextView tvStatus, tvTerminal, tvSklad, tvVerze, tvIdTerminalu;
+    private TextView tvStatus, tvTerminal, tvSklad, tvVerze, tvNazevTerminalu;
     private ImageView imgWS, imgLogo;
 
     public static Context appContext;
@@ -71,8 +71,8 @@ public class MainActivity extends BaseActivity {
         tvStatus = findViewById(R.id.tvStatus);
         imgWS=findViewById(R.id.imgWinShop);
         imgLogo=findViewById(R.id.imgLogo);
-        tvIdTerminalu=findViewById(R.id.tvIdTerminalu);
-        tvTerminal=findViewById(R.id.tVTerminal);
+        tvNazevTerminalu=findViewById(R.id.tvNazevTerminalu);
+        tvTerminal=findViewById(R.id.tvTerminal);
         tvSklad=findViewById(R.id.tvSklad);
         tvVerze=findViewById(R.id.tvVerze);
 
@@ -166,7 +166,7 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        tvIdTerminalu.setOnLongClickListener(new View.OnLongClickListener() {
+        tvNazevTerminalu.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 Heslo("Uzavření košíku","K");
@@ -243,7 +243,8 @@ public class MainActivity extends BaseActivity {
         sklad_nazev = preferences.getString(PreferConst.SKLAD_NAZEV, "");
         winShopStd= preferences.getBoolean(PreferConst.WS_STD, false);
 
-        tvTerminal.setText(terminal_nazev);
+        tvTerminal.setText("id: "+String.valueOf(terminal_id));
+        tvNazevTerminalu.setText(terminal_nazev);
         tvSklad.setText(sklad_nazev);
         String version = "";
         try {
@@ -304,26 +305,26 @@ public class MainActivity extends BaseActivity {
                                 encodedBytes = Base64.getDecoder().decode(db.getString("LOGO"));
                                 Bitmap logo = BitmapFactory.decodeByteArray(encodedBytes, 0, encodedBytes.length);
                                 if (logo == null) {
-                                    tvIdTerminalu.setVisibility(View.VISIBLE);
-                                    tvIdTerminalu.setText(String.valueOf(terminal_id));
+                                    tvNazevTerminalu.setVisibility(View.VISIBLE);
+                                    tvNazevTerminalu.setText(terminal_nazev);
                                     imgLogo.setVisibility(View.GONE);
                                 } else {
-                                    tvIdTerminalu.setVisibility(View.GONE);
+                                    tvNazevTerminalu.setVisibility(View.GONE);
                                     imgLogo.setVisibility(View.VISIBLE);
                                     imgLogo.setImageBitmap(logo);
                                 }
                             }
                             catch (Exception ex)
                             {
-                                tvIdTerminalu.setVisibility(View.VISIBLE);
-                                tvIdTerminalu.setText(String.valueOf(terminal_id));
+                                tvNazevTerminalu.setVisibility(View.VISIBLE);
+                                tvNazevTerminalu.setText(terminal_nazev);
                                 imgLogo.setVisibility(View.GONE);
                             }
                         }
                         else
                         {
-                            tvIdTerminalu.setVisibility(View.VISIBLE);
-                            tvIdTerminalu.setText(String.valueOf(terminal_id));
+                            tvNazevTerminalu.setVisibility(View.VISIBLE);
+                            tvNazevTerminalu.setText(terminal_nazev);
                             imgLogo.setVisibility(View.GONE);
                         }
                     } else {
@@ -448,11 +449,12 @@ public class MainActivity extends BaseActivity {
                     if (terminal_id!=pom_terminal_id) {
                         terminal_id=pom_terminal_id;
                         editor.putInt(PreferConst.TERMINAL_ID, terminal_id);
+                        tvTerminal.setText("id: "+String.valueOf(terminal_id));
                     }
                     if (!terminal_nazev.equals(pom_terminal_nazev)) {
                         terminal_nazev = pom_terminal_nazev;
                         editor.putString(PreferConst.TERMINAL_NAZEV, terminal_nazev);
-                        tvTerminal.setText(terminal_nazev);
+                        tvNazevTerminalu.setText(terminal_nazev);
                     }
                     if (sklad_id!=pom_sklad_id) {
                         sklad_id = pom_sklad_id;

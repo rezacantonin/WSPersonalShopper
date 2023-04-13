@@ -63,7 +63,7 @@
         android:layout_height="150dp" />
 
     <TextView
-        android:id="@+id/tvIdTerminalu"
+        android:id="@+id/tvNazevTerminalu"
         android:layout_width="match_parent"
         android:layout_height="170dp"
         android:gravity="center"
@@ -79,7 +79,7 @@
         android:orientation="horizontal"
         android:weightSum="100">
         <TextView
-            android:id="@+id/tVTerminal"
+            android:id="@+id/tvTerminal"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="15"
