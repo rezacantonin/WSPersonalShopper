@@ -48,7 +48,7 @@ public class QuantityFragmentDialog extends DialogFragment {
             maxQ = getArguments().getInt(ARG_MAXQ);
             currQ = getArguments().getInt(ARG_CURRQ);
             data = new ArrayList<>();
-            for (int i = 1; i <= maxQ; i++) data.add(i);
+            for (int i = 1; i <= Math.min(maxQ,20); i++) data.add(i);
         }
     }
 
