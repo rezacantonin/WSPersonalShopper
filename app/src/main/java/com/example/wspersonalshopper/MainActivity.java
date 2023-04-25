@@ -105,6 +105,7 @@ public class MainActivity extends BaseActivity {
         btnBasket.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!db.isConnected()) db.Reconnect();
                 db.SetQuery_MOBILNI_TERMINAL(1, "PS_Test", "", 0, 0, "", 0, 0, 0,"");
                 try {
                     if (db.ExecQuery()) {
@@ -135,6 +136,7 @@ public class MainActivity extends BaseActivity {
                                 }, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+                                        if (!db.isConnected()) db.Reconnect();
                                         db.SetQuery_MOBILNI_TERMINAL(1, "PS_VymazVse", "", 0, 0, "", 0, 0, 0,"");
                                         try {
                                             if (db.ExecQuery()) {
@@ -600,6 +602,7 @@ public class MainActivity extends BaseActivity {
                 if (param=="K")
                 {
                     if (heslo.matches("9876")) {
+                        if (!db.isConnected()) db.Reconnect();
                         db.SetQuery_MOBILNI_TERMINAL(1, "PS_Uzavrit", "", 0, 0, "", 0, 0, 0, "");
                         try {
                             if (db.ExecQuery()) {

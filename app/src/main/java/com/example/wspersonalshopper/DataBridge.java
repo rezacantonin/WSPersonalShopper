@@ -34,7 +34,6 @@ public class DataBridge {
     private  int retType;
 
     public String ErrorMsg;
-    public boolean ConnectErr;
     public  boolean hasRow;
     private  Context context;
 
@@ -90,7 +89,6 @@ public class DataBridge {
             }
             else
                 res = connect != null && !connect.isClosed();
-            ConnectErr = false;
         } catch (Exception e) {
             ErrorMsg = e.getMessage();
         }
@@ -139,22 +137,30 @@ public class DataBridge {
                     else ErrorMsg="";
                 }
             } else {
-                stmt = null;
-                rs = null;
-                try {
-                    stmt = connect.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                    rs = stmt.executeQuery(query);
-                    if (rs.next()) {
-                        res = true;
-                        hasRow=true;
+                for (int i=1; i<=2; i++) {
+                    stmt = null;
+                    rs = null;
+                    try {
+                        stmt = connect.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                        rs = stmt.executeQuery(query);
+                        if (rs.next()) {
+                            res = true;
+                            hasRow = true;
+                        } else {
+                            if (retType == 0) res = true;
+                            else ErrorMsg = "";
+                        }
+                        break;
+                    } catch (SQLException ex) {
+                        if (i==1 && (!isConnected() || ErrorMsg.indexOf("Software caused connection abort") > 0 )) {
+                            Utils.CloseQuery(stmt, rs);
+                            Reconnect();
+                        }
+                        else {
+                            ErrorMsg = ex.getMessage();
+                            break;
+                        }
                     }
-                    else {
-                        if (retType == 0) res = true;
-                        else ErrorMsg="";
-                    }
-                } catch (SQLException ex) {
-                    ErrorMsg = ex.getMessage();
-                    if (ErrorMsg.indexOf("Software caused connection abort") > 0) ConnectErr = true;
                 }
             }
         } catch (Exception ex) {
@@ -186,21 +192,30 @@ public class DataBridge {
                     }
                 }
             } else {
-                stmt = null;
-                rs = null;
-                try {
-                    stmt = connect.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
-                    rs = stmt.executeQuery(query);
-                    if (rs.next()) {
-                        res = true;
-                        hasRow = true;
-                    } else {
-                        if (retType == 10) res = true;
-                        else ErrorMsg="Žádná data k dispozici";
+                for (int i=1; i<=2; i++) {
+                    stmt = null;
+                    rs = null;
+                    try {
+                        stmt = connect.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                        rs = stmt.executeQuery(query);
+                        if (rs.next()) {
+                            res = true;
+                            hasRow = true;
+                        } else {
+                            if (retType == 10) res = true;
+                            else ErrorMsg = "Žádná data k dispozici";
+                        }
+                        break;
+                    } catch (SQLException ex) {
+                        if (i==1 && (!isConnected() || ErrorMsg.indexOf("Software caused connection abort") > 0 )) {
+                            Utils.CloseQuery(stmt, rs);
+                            Reconnect();
+                        }
+                        else {
+                            ErrorMsg = ex.getMessage();
+                            break;
+                        }
                     }
-                } catch (SQLException ex) {
-                    ErrorMsg = ex.getMessage();
-                    if (ErrorMsg.indexOf("Software caused connection abort") > 0) ConnectErr = true;
                 }
             }
         } catch (Exception ex) {
@@ -275,7 +290,7 @@ public class DataBridge {
     }
 
     public boolean Reconnect() {
-        if (presApi) connect = connectClass.CONN(context);
+        if (!presApi) connect = connectClass.CONN(context);
         return (isConnected());
     }
 

@@ -213,6 +213,7 @@ public class BasketActivity extends BaseActivity  {
     }
 
     private void Nacti() {
+        if (!db.isConnected()) db.Reconnect();
         db.SetQuery_MOBILNI_TERMINAL(10, "PS_Nacti", "", 0, 0, "", 0, 0, 0, "");
         try {
             if (db.ExecQueryArr()) {
@@ -250,6 +251,7 @@ public class BasketActivity extends BaseActivity  {
 
     private boolean VymazVse( ) {
         boolean pomRes=false;
+        if (!db.isConnected()) db.Reconnect();
         db.SetQuery_MOBILNI_TERMINAL(1, "PS_VymazVse", "", 0, 0, "", 0, 0, 0,"");
         try {
             if (db.ExecQuery()) {
@@ -270,6 +272,7 @@ public class BasketActivity extends BaseActivity  {
 
     private void PlatbaKosiku()
     {
+        if (!db.isConnected()) db.Reconnect();
         db.SetQuery_MOBILNI_TERMINAL(1, "PS_Uzavrit", "", 1, 0, "", 0, 0, 0,"");
         try {
             if (db.ExecQuery()) {
