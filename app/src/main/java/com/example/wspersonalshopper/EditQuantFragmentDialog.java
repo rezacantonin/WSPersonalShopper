@@ -70,12 +70,15 @@ public class EditQuantFragmentDialog extends DialogFragment {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode==KeyEvent.KEYCODE_ENTER)
                 {
-                    Integer quantity = Integer.parseInt(edEditQuantFragMnozstvi.getText().toString());
-                    if (quantity <= maxQ) {
-                        ((BasketActivity) getActivity()).QuantityFragmentDialog_QuantityOK(quantity);
-                        getDialog().dismiss();
-                    } else
-                        Toast.makeText(getActivity(), "Max. množství je " + maxQ, Toast.LENGTH_LONG).show();
+                    if (!edEditQuantFragMnozstvi.getText().toString().isEmpty()) {
+                        Integer quantity = Integer.parseInt(edEditQuantFragMnozstvi.getText().toString());
+                        if (quantity <= maxQ) {
+                            ((BasketActivity) getActivity()).QuantityFragmentDialog_QuantityOK(quantity);
+                            getDialog().dismiss();
+                        } else
+                            Toast.makeText(getActivity(), "Max. množství je " + maxQ, Toast.LENGTH_LONG).show();
+                    }
+                        Toast.makeText(getActivity(), "Zadejte množství", Toast.LENGTH_LONG).show();
                 }
                 return false;
             }
@@ -84,12 +87,15 @@ public class EditQuantFragmentDialog extends DialogFragment {
         btnOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Integer quantity = Integer.parseInt(edEditQuantFragMnozstvi.getText().toString());
-                if (quantity <= maxQ) {
-                    ((BasketActivity) getActivity()).QuantityFragmentDialog_QuantityOK(quantity);
-                    getDialog().dismiss();
-                } else
-                    Toast.makeText(getContext(), "Max. množství je " + maxQ, Toast.LENGTH_LONG).show();
+                if (!edEditQuantFragMnozstvi.getText().toString().isEmpty()) {
+                    Integer quantity = Integer.parseInt(edEditQuantFragMnozstvi.getText().toString());
+                    if (quantity <= maxQ) {
+                        ((BasketActivity) getActivity()).QuantityFragmentDialog_QuantityOK(quantity);
+                        getDialog().dismiss();
+                    } else
+                        Toast.makeText(getContext(), "Max. množství je " + maxQ, Toast.LENGTH_LONG).show();
+                }
+                Toast.makeText(getActivity(), "Zadejte množství", Toast.LENGTH_LONG).show();
             }
         });
 
