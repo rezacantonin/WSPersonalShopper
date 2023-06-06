@@ -72,12 +72,17 @@ public class EditQuantFragmentDialog extends DialogFragment {
                 {
                     if (!edEditQuantFragMnozstvi.getText().toString().isEmpty()) {
                         Integer quantity = Integer.parseInt(edEditQuantFragMnozstvi.getText().toString());
-                        if (quantity <= maxQ) {
-                            ((BasketActivity) getActivity()).QuantityFragmentDialog_QuantityOK(quantity);
-                            getDialog().dismiss();
-                        } else
-                            Toast.makeText(getActivity(), "Max. množství je " + maxQ, Toast.LENGTH_LONG).show();
+                        if (quantity>0) {
+                            if (quantity <= maxQ) {
+                                ((BasketActivity) getActivity()).QuantityFragmentDialog_QuantityOK(quantity);
+                                getDialog().dismiss();
+                            } else
+                                Toast.makeText(getActivity(), "Max. množství je " + maxQ, Toast.LENGTH_LONG).show();
+                        }
+                        else
+                            Toast.makeText(getActivity(), "Zadejte množství", Toast.LENGTH_LONG).show();
                     }
+                    else
                         Toast.makeText(getActivity(), "Zadejte množství", Toast.LENGTH_LONG).show();
                 }
                 return false;

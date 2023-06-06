@@ -16,6 +16,7 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
@@ -43,6 +44,10 @@ public class BasketActivity extends BaseActivity  {
     private boolean queryInProgress;
     private boolean winShopStd;
     private DataBridge db;
+
+    private double zaokrohleniSoucet=0;
+    private double zaokrohleniCastka=0;
+    private int zaokrohleniPocet=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,13 +102,38 @@ public class BasketActivity extends BaseActivity  {
             @Override
             public void onClick(View v) {
                 if (basketItems.size()>0) {
-                    Messages.ShowQuestion(BasketActivity.this, "Upozornění", "Opravdu košík uzavřít?", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
+                    zaokrohleniCastka=0; zaokrohleniSoucet=0; zaokrohleniPocet=0;
+                    for (C_Item item : basketItems) {
+                        zaokrohleniSoucet+=item.Cena*item.Mnozstvi;
+                        if ((item.Cena*item.Mnozstvi)<5)
                         {
-                            PlatbaKosiku();
+                            zaokrohleniPocet++;
+                            zaokrohleniCastka+= 5-(item.Cena*item.Mnozstvi);
                         }
-                    }, null);
+                    }
+                    if (zaokrohleniCastka!=0) {
+                        Messages.ShowQuestion(BasketActivity.this, "Upozornění", "Zaokrouhlení podlimitnich položek : "+  Utils.dfCena.format(zaokrohleniCastka)+"\n"
+                                                                             + "Výše účtu po zaokrouhlení : "+ Utils.dfCena.format(zaokrohleniSoucet+zaokrohleniCastka)+"\n"
+                                                                             + "Opravdu košík uzavřít?", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                C_Item zaokrItem=new C_Item();
+                                zaokrItem.Kod="99900001";
+                                zaokrItem.Cena=0.01;
+                                zaokrItem.Mnozstvi=zaokrohleniCastka*100;
+                                if (Zapis(zaokrItem,zaokrohleniCastka*100)) PlatbaKosiku();
+                            }
+                        }, null);
+                    }
+                    else
+                    {
+                        Messages.ShowQuestion(BasketActivity.this, "Upozornění", "Opravdu košík uzavřít?", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                PlatbaKosiku();
+                            }
+                        }, null);
+                    }
                     //
                     //Heslo();
                 }
@@ -345,11 +375,13 @@ public class BasketActivity extends BaseActivity  {
             TextView tvName = convertView.findViewById(R.id.tvItemNazev);
             TextView tvBarvaVel = convertView.findViewById(R.id.tvItemBarvaVel);
             TextView tvCena = convertView.findViewById(R.id.tvItemCena);
+            TextView tvKod = convertView.findViewById(R.id.tvItemKod);
             ImageButton btnItemShow=convertView.findViewById(R.id.btnItemShow);
             Button btnItemMnoz=convertView.findViewById(R.id.btnItemMnoz);
             ImageButton btnItemDel=convertView.findViewById(R.id.btnItemDel);
             //
             tvName.setText(item.Nazev);
+            tvKod.setText(item.Kod);
             tvCena.setText(Utils.df.format(item.Mnozstvi)+" x "+ Utils.dfCena.format(item.Cena)+" = "+Utils.dfCena.format(item.Mnozstvi*item.Cena));
             if (item.BarvaNazev.isEmpty() && item.VelikostNazev.isEmpty()) tvBarvaVel.setVisibility(View.GONE);
             else {
