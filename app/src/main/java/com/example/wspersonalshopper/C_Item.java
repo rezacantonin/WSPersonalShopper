@@ -22,6 +22,7 @@ public class C_Item {
     public double Stav;
     public int ZboziId;
     public double MnozVaha;
+    public String NazevCizi;
 
     public boolean ShowEditMnoz;
 
@@ -30,8 +31,7 @@ public class C_Item {
     }
 
     public C_Item(int id, String ean, String kod, String nazev, int velikostId, String velikostIdStr, String velikostNazev, int barvaId, String barvaIdStr, String barvaNazev,
-                  int delkaId, String delkaNazev, int rozmerId, String rozmerNazev, double cena, Double mnozstvi, int zboziId)
-    {
+                  int delkaId, String delkaNazev, int rozmerId, String rozmerNazev, double cena, Double mnozstvi, int zboziId, String nazevCizi) {
         Id = id;
         Ean = ean;
         Kod = kod;
@@ -50,8 +50,9 @@ public class C_Item {
         Mnozstvi = mnozstvi;
         Stav = 0;
         ZboziId = zboziId;
-        MnozVaha=0;
-        ShowEditMnoz=false;
+        MnozVaha = 0;
+        ShowEditMnoz = false;
+        NazevCizi = nazevCizi;
     }
 
     public C_Item(final C_Item item) {
@@ -79,6 +80,7 @@ public class C_Item {
         ZboziId = item.ZboziId;
         MnozVaha = item.MnozVaha;
         ShowEditMnoz = item.ShowEditMnoz;
+        NazevCizi = item.NazevCizi;
     }
 
     public void Clear() {
@@ -100,8 +102,9 @@ public class C_Item {
         Mnozstvi = 0.0;
         Stav = 0;
         ZboziId = 0;
-        MnozVaha=0;
-        ShowEditMnoz=false;
+        MnozVaha = 0;
+        ShowEditMnoz = false;
+        NazevCizi = "";
     }
 
 }

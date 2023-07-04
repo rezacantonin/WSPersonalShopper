@@ -262,10 +262,11 @@ public class BasketActivity extends BaseActivity  {
                         item.DelkaNazev = db.getString("NAZEV_DELKY").trim();
                         item.RozmerId = db.getInt("ID_ROZMERU");
                         item.RozmerNazev = db.getString("NAZEV_ROZMERU").trim();
-                        item.Stav = db.getDouble("STAV_KS") - db.getDouble("MNOZ_ZASOBNIK");;
+                        item.Stav = db.getDouble("STAV_KS") - db.getDouble("MNOZ_ZASOBNIK");
                         item.ZboziId = db.getInt("ZBOZI_ID");
                         item.Cena = db.getDouble("PC");
-                        item.Mnozstvi = db.getDouble("MNOZSTVI");;
+                        item.Mnozstvi = db.getDouble("MNOZSTVI");
+                        item.NazevCizi = db.getString("NAZEV_CIZI").trim();
                         item.ShowEditMnoz = false;
                         basketItems.add(item);
                     } while (db.nextRow());
@@ -376,6 +377,7 @@ public class BasketActivity extends BaseActivity  {
             TextView tvBarvaVel = convertView.findViewById(R.id.tvItemBarvaVel);
             TextView tvCena = convertView.findViewById(R.id.tvItemCena);
             TextView tvKod = convertView.findViewById(R.id.tvItemKod);
+            TextView tvNazevCizi = convertView.findViewById(R.id.tvItemNazevCizi);
             ImageButton btnItemShow=convertView.findViewById(R.id.btnItemShow);
             Button btnItemMnoz=convertView.findViewById(R.id.btnItemMnoz);
             ImageButton btnItemDel=convertView.findViewById(R.id.btnItemDel);
@@ -387,6 +389,11 @@ public class BasketActivity extends BaseActivity  {
             else {
                 tvBarvaVel.setText(item.BarvaNazev + " " + item.VelikostNazev);
                 tvBarvaVel.setVisibility(View.VISIBLE);
+            }
+            if (item.NazevCizi.isEmpty() && item.NazevCizi.isEmpty()) tvNazevCizi.setVisibility(View.GONE);
+            else {
+                tvNazevCizi.setText(item.NazevCizi);
+                tvNazevCizi.setVisibility(View.VISIBLE);
             }
             //
             if (item.ShowEditMnoz)
@@ -532,6 +539,7 @@ public class BasketActivity extends BaseActivity  {
                                 info.item.Cena = db.getDouble("PC");
                                 info.item.Mnozstvi = 1;
                                 info.item.MnozVaha = mnozVaha;
+                                info.item.NazevCizi = db.getString("NAZEV_CIZI").trim();
                                 info.Nasel = true;
                             }
                         } catch (Exception e) {

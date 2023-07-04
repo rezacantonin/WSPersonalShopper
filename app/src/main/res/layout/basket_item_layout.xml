@@ -8,6 +8,18 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/tvItemNazevCizi"
+        android:layout_width="200dp"
+        android:layout_height="17dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="4dp"
+        android:text="Cizi nazev"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvItemBarvaVel" />
+
+    <TextView
         android:id="@+id/tvItemKod"
         android:layout_width="60dp"
         android:layout_height="21dp"
@@ -18,7 +30,7 @@
         android:textColor="@color/black"
         android:textSize="12sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvItemBarvaVel" />
+        app:layout_constraintTop_toBottomOf="@+id/tvItemNazevCizi" />
 
     <TextView
         android:id="@+id/tvItemBarvaVel"
@@ -42,7 +54,7 @@
         android:textColor="@color/black"
         android:textSize="13sp"
         app:layout_constraintStart_toEndOf="@+id/tvItemKod"
-        app:layout_constraintTop_toBottomOf="@+id/tvItemBarvaVel" />
+        app:layout_constraintTop_toBottomOf="@+id/tvItemNazevCizi" />
 
     <TextView
         android:id="@+id/tvItemNazev"
